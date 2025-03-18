@@ -1,9 +1,9 @@
 import { useTexture } from '@react-three/drei'
-import { useThree } from '@react-three/fiber'
+import { useFrame, useThree } from '@react-three/fiber'
 import { ReactElement, useEffect, useMemo, useRef } from 'react'
 import { IUniform, ShaderMaterial, Texture, Vector2, Vector4 } from 'three'
 import { getResolution, XY } from '../helpers.js'
-
+/* eslint sort/object-properties:off */
 export type ShaderUniforms = {
     uTexture: IUniform<Texture>
     resolution: IUniform<Vector4>
@@ -18,6 +18,15 @@ export type ShaderUniforms = {
     uImageAspect: IUniform<number>
     uOpacity: IUniform<number>
 }
+export type ControlDefaults = Pick<
+    MaterialScopeProps,
+    | 'segments'
+    | 'scaleFactor'
+    | 'rotationScale'
+    | 'offsetScale'
+    | 'opacity'
+    | 'rotation_speed'
+>
 
 export type MaterialScopeProps = {
     /** Texture url */
@@ -40,8 +49,9 @@ export type MaterialScopeProps = {
     mouse_multiplier?: number
 
     children?: ReactElement
-    onCallback?: (value: number) => void
+    onInit?: (uniforms: ShaderUniforms, _defaults: ControlDefaults) => void
 }
+
 const MaterialScope = ({
     blendMode = 'normal',
     children,
@@ -51,12 +61,14 @@ const MaterialScope = ({
     offset = [0, 0],
     offset_speed = 0,
     offsetScale = 1,
-    onCallback,
+    onInit,
     opacity = 1,
+
     rotation = 0,
     rotation_speed = 0,
     rotationScale = 1,
     scaleFactor = 1,
+
     segments = 6,
     //todo
     speed_interval = 0.2,
@@ -98,14 +110,43 @@ const MaterialScope = ({
         scaleFactor,
         _texture,
     ])
-
+    const getUniforms = (): ShaderUniforms | undefined => {
+        return shaderMaterialRef.current !== null &&
+            shaderMaterialRef.current.uniforms !== undefined
+            ? (shaderMaterialRef.current.uniforms as ShaderUniforms)
+            : undefined
+    }
     useEffect(() => {
+        const uniforms: ShaderUniforms | undefined = getUniforms()
+        if (uniforms !== undefined && onInit !== undefined) {
+            const _defaults: ControlDefaults = {
+                segments,
+                scaleFactor,
+                rotationScale,
+                offsetScale,
+                opacity,
+                rotation_speed,
+            }
+            onInit(uniforms, _defaults)
+        }
         return (): void => {}
     }, [])
 
+    useFrame((state, delta, xrFrame) => {
+        const uniforms: ShaderUniforms | undefined = getUniforms()
+
+        if (rotation_speed !== 0 && uniforms !== undefined) {
+            uniforms.uRotation.value += rotation_speed
+        }
+    })
     return (
         <>
-            <div>{children}</div>
+            <shaderMaterial
+                ref={shaderMaterialRef}
+                vertexShader={vertex}
+                fragmentShader={fragment}
+                uniforms={uniforms}
+            />
         </>
     )
 }

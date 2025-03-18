@@ -2,7 +2,7 @@ import { ReactElement, useRef, useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
-import HelloWorld from './components/HelloWorld.tsx'
+import ThreeCanvas from './components/ThreeCanvas.tsx'
 function App(): ReactElement {
     const [count, setCount] = useState(0)
     // const helloRef = useRef<ReactElement<typeof HelloWorld> | null>(null)
@@ -25,20 +25,12 @@ function App(): ReactElement {
                 </a>
             </div>
             <h1>Vite + React</h1>
-            <span ref={divRef} className="card">
-                <HelloWorld onCallback={handleCallback} testing1={30}>
-                    <h2>HEALINE </h2>
-                </HelloWorld>
-                <button
-                    onClick={() => {
-                        setCount((count) => count + 1)
-                    }}>
-                    count is {count}
-                </button>
-                <p>
-                    Edit <code>src/App.tsx</code> and save to test HMR
-                </p>
-            </span>
+            <div
+                ref={divRef}
+                style={{ margin: '0 auto', maxWidth: '60%', width: 'auto' }}
+                className="card">
+                <ThreeCanvas />
+            </div>
             <p className="read-the-docs">
                 Click on the Vite and React logos to learn more
             </p>
