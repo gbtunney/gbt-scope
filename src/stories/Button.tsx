@@ -2,6 +2,7 @@ import React from 'react'
 
 import './button.css'
 
+export default {}
 export type ButtonProps = {
     /** Is this the principal call to action on the page? */
     primary?: boolean

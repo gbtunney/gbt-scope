@@ -3,6 +3,7 @@ import React from 'react'
 import { Header } from './Header.tsx'
 import './page.css'
 
+export default {}
 type User = {
     name: string
 }
