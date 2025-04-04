@@ -5,13 +5,14 @@
         "lib": ["ES2020", "DOM", "DOM.Iterable"],
         "composite": false,
         "noEmit": true,
-        "types": ["three"],
         "jsxFragmentFactory": "",
         "jsxFactory": "",
         "allowImportingTsExtensions": true,
         "exactOptionalPropertyTypes": false /*TODO: remove?*/,
         "jsx": "react-jsx",
         "allowJs": true,
+        "sourceMap": true,
+        "rootDir": "./",
         "noUncheckedSideEffectImports": true
     },
     "include": ["**/*.ts", "**/*.tsx"]

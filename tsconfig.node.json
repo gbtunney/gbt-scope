@@ -2,8 +2,11 @@
     "extends": "@snailicide/build-config/tsconfig-base",
     "compilerOptions": {
         "rootDir": ".",
-        "types": ["node"]
+        "types": ["node"],
+        "sourceMap": true,
+        "esModuleInterop": true,
+        "lib": ["dom"]
     },
-    "exclude": ["./node_modules"],
+    "exclude": ["/node_modules", "scratch", "**/*.tsx"],
     "include": ["./*.ts", "./.storybook/*.ts", "./*.mts", "./*.cts", "./*.json"]
 }

@@ -1,4 +1,4 @@
-import { Vector4 } from 'three'
+import { Vector4 } from '@babylonjs/core'
 
 export default {}
 export type Dimensions = {

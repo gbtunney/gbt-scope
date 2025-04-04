@@ -2,14 +2,15 @@ import { ReactElement, useRef, useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
-import ThreeCanvas from './components/ThreeCanvas.tsx'
+import BabylonSceneWrapper from './components/BabylonSceneWrapper.tsx'
+/** Import Kaleidoscope from './components/Kaleidoscope.tsx' */
 function App(): ReactElement {
     const [count, setCount] = useState(0)
-    // const helloRef = useRef<ReactElement<typeof HelloWorld> | null>(null)
     const divRef = useRef<HTMLDivElement | null>(null)
-    const handleCallback = (value: number): void => {
+    const buttonClick = (value: number): void => {
         console.log('Callback value:', value)
     }
+
     return (
         <>
             <div>
@@ -29,13 +30,15 @@ function App(): ReactElement {
                 ref={divRef}
                 style={{ margin: '0 auto', maxWidth: '60%', width: 'auto' }}
                 className="card">
-                <ThreeCanvas />
+                <BabylonSceneWrapper>
+                    <h2>Babylon!!</h2>
+                </BabylonSceneWrapper>
             </div>
             <p className="read-the-docs">
                 Click on the Vite and React logos to learn more
             </p>
         </>
-    )
+    ) as ReactElement
 }
 
 export default App
