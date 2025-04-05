@@ -1,4 +1,4 @@
-import { Vector4 } from '@babylonjs/core'
+import { Color3, Vector4 } from '@babylonjs/core'
 
 export default {}
 export type Dimensions = {
@@ -15,3 +15,5 @@ export const getResolution = (dimensions: Dimensions): Vector4 => {
 }
 export const distanceBetweenPoints = (a: Point, b: Point): number =>
     Math.hypot(b.x - a.x, b.y - a.y)
+
+export type RGBColor = ConstructorParameters<typeof Color3>

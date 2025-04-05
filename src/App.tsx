@@ -30,7 +30,7 @@ function App(): ReactElement {
                 ref={divRef}
                 style={{ margin: '0 auto', maxWidth: '60%', width: 'auto' }}
                 className="card">
-                <BabylonSceneWrapper>
+                <BabylonSceneWrapper color={[0, 1, 0]}>
                     <h2>Babylon!!</h2>
                 </BabylonSceneWrapper>
             </div>

@@ -4,20 +4,25 @@ import {
     Mesh,
     MeshBuilder,
     Scene,
+    ShaderMaterial,
     Vector3,
 } from '@babylonjs/core'
 import SceneComponent from 'babylonjs-hook'
 import { ReactElement, useEffect, useRef, useState } from 'react'
+import { RGBColor } from '../helpers.js'
+import { getColorShaderMaterial } from '../materials/index.js'
 
 type BabylonSceneWrapperProps = {
     testing1?: number
     testing2?: string
+    color?: RGBColor
     children?: ReactElement
     onCallback?: (value: number) => void
 }
 
 const BabylonSceneWrapper = ({
     children,
+    color = [1, 0, 0],
     onCallback,
     testing1 = 4,
     testing2 = 'GBT',
@@ -48,10 +53,17 @@ const BabylonSceneWrapper = ({
         light.intensity = 0.7
 
         // Create a box
-        const box = MeshBuilder.CreateBox('box', { size: 2 }, _scene)
+        const box: Mesh = MeshBuilder.CreateBox('box', { size: 2 }, _scene)
         box.position.y = 1 // Move the box upward by half its height
-        boxRef.current = box
 
+        const _shader: ShaderMaterial = getColorShaderMaterial(
+            _scene,
+            {},
+            color,
+        )
+        box.material = _shader
+
+        boxRef.current = box
         // Create a ground
         MeshBuilder.CreateGround('ground', { height: 6, width: 6 }, _scene)
     }
