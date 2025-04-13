@@ -8,10 +8,10 @@ import {
 } from '@babylonjs/core'
 import SceneComponent from 'babylonjs-hook'
 import { ReactElement, useState } from 'react'
-import { TVector3 } from '../helpers.js'
+import { Vector3Params } from '../helpers.js'
 import { getTextureShaderMaterial } from '../materials/index.js'
 type SceneGenericProps = {
-    camera_position?: TVector3
+    camera_position?: Vector3Params
     children?: ReactElement
 }
 /** THIS Is a GENERIC SCENE USAGE */
