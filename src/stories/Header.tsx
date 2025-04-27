@@ -1,7 +1,6 @@
-import React from 'react'
-
-import { Button } from './Button.tsx'
 import './header.css'
+import { ReactElement } from 'react'
+import { Button } from './Button.tsx'
 
 export default {}
 type User = {
@@ -9,7 +8,7 @@ type User = {
 }
 
 export type HeaderProps = {
-    user?: User | undefined
+    user?: User
     onLogin?: () => void
     onLogout?: () => void
     onCreateAccount?: () => void
@@ -20,7 +19,7 @@ export const Header = ({
     onLogin,
     onLogout,
     user,
-}: HeaderProps): React.ReactElement => (
+}: HeaderProps): ReactElement => (
     <header>
         <div className="storybook-header">
             <div>

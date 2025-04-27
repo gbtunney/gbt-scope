@@ -1,6 +1,7 @@
-import { StrictMode } from 'react'
+import CssBaseline from '@mui/material/CssBaseline'
+import { Fragment, StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import './index.css'
+
 import App from './App.tsx'
 
 export default {}
@@ -9,7 +10,10 @@ const element = document.getElementById('root')
 if (element !== null) {
     createRoot(element).render(
         <StrictMode>
-            <App />
+            <Fragment>
+                <CssBaseline />
+                <App />
+            </Fragment>
         </StrictMode>,
     )
 }

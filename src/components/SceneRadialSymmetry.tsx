@@ -1,19 +1,26 @@
 import {
     ArcRotateCamera,
+    Color4,
     HemisphericLight,
     Mesh,
     MeshBuilder,
     Scene,
     Vector3,
 } from '@babylonjs/core'
+import { useGSAP } from '@gsap/react'
+import Divider from '@mui/material/Divider'
+import Typography from '@mui/material/Typography'
 import SceneComponent from 'babylonjs-hook'
-import { ReactElement, useState } from 'react'
+import { gsap } from 'gsap'
+import { ReactElement, useEffect, useState } from 'react'
+import ExpandingPanel from './gui/ExpandingPanel.tsx'
 import InputSlider from './gui/InputSlider.tsx'
 import MaterialRadialSymmetry, {
     MaterialRadialSymmetryProps,
 } from './MaterialRadialSymmetry.tsx'
 import { CameraConfigPosition, setRotateCameraPosition } from '../helpers.ts'
 
+gsap.registerPlugin(useGSAP)
 type SceneRadialSymmetryProps = {
     children?: ReactElement
     cameraSettings?: CameraConfigPosition
@@ -28,11 +35,9 @@ type ControlProps = Pick<
     | 'scaleFactor'
 >
 
-/** Const yty :CameraConfigPosition= {x:0} */
 const SceneRadialSymmetry = ({
     cameraSettings = {
         enabled: true,
-        //position: [  0, 5, -10], // eset position
         hRotation: Math.PI / 2,
         vRotation: Math.PI / 4,
     },
@@ -44,7 +49,7 @@ const SceneRadialSymmetry = ({
     const [scaleFactor, setScaleFactor] = useState<number>(1)
     const [rotation, setRotation] = useState<number>(0)
     const [offsetScale, setoffsetScale] = useState<number>(0.02)
-    const [rotationScale, setrotationScale] = useState<number>(0.02)
+    const [rotationScale, setrotationScale] = useState<number>(0.2)
     const [_offset, setOffset] = useState<[number, number]>([0, 0])
 
     const updateOffset = (key: 'x' | 'y', value: number): void => {
@@ -54,6 +59,7 @@ const SceneRadialSymmetry = ({
     }
 
     const onSceneReady = (_scene: Scene): void => {
+        _scene.clearColor = new Color4(0, 0, 0, 1)
         setScene(_scene)
 
         // Create an ArcRotateCamera for zoom and rotation
@@ -65,6 +71,8 @@ const SceneRadialSymmetry = ({
             Vector3.Zero(),
             _scene,
         )
+
+        //  camera.mode  = Camera.ORTHOGRAPHIC_CAMERA
         // Enable mouse/touch controls
         setRotateCameraPosition(camera, _scene, cameraSettings)
 
@@ -89,93 +97,109 @@ const SceneRadialSymmetry = ({
         }
     }
 
+    // Animate the rotation property continuously
+    useEffect(() => {
+        let animationFrameId: number
+
+        const animate = (): void => {
+            setRotation((prev) => prev + 0.01) // Increment rotation and keep it within 0-360
+            animationFrameId = requestAnimationFrame(animate)
+        }
+        /** TODO: redo this animationFrameId = requestAnimationFrame(animate) */
+        return (): void => {
+            cancelAnimationFrame(animationFrameId)
+        } // Cleanup on unmount
+    }, [])
+
     return (
         <>
-            <div
-                className="controls"
-                style={{ background: '#4C3B25', position: 'absolute' }}>
-                <div>[esc] to reset camera</div>
-                <InputSlider
-                    min={3}
-                    max={20}
-                    step={1}
-                    value={segments}
-                    onChange={(newValue) => {
-                        setSegments(newValue)
-                    }} // Update segments dynamically
-                    label="Segments"
-                />
-                <InputSlider
-                    min={0.02}
-                    max={3}
-                    step={0.001}
-                    value={scaleFactor}
-                    onChange={(newValue) => {
-                        setScaleFactor(newValue)
-                    }}
-                    label="Scale Factor"
-                />
-                <hr />
+            <ExpandingPanel>
+                <>
+                    <Typography>[esc] to reset camera</Typography>
+                    <InputSlider
+                        min={3}
+                        max={20}
+                        step={1}
+                        value={segments}
+                        onChange={(newValue) => {
+                            setSegments(newValue)
+                        }}
+                        label="Segments"
+                    />
+                    <InputSlider
+                        min={0.02}
+                        max={3}
+                        step={0.001}
+                        value={scaleFactor}
+                        onChange={(newValue) => {
+                            setScaleFactor(newValue)
+                        }}
+                        label="Scale Factor"
+                    />
+                    <Divider />
 
-                <InputSlider
-                    min={0}
-                    max={360}
-                    step={0.001}
-                    value={rotation}
-                    onChange={(newValue) => {
-                        setRotation(newValue)
-                    }}
-                    label="Rotation"
-                />
-                <InputSlider
-                    min={0.001}
-                    max={4}
-                    step={0.001}
-                    value={rotationScale}
-                    onChange={(newValue) => {
-                        setrotationScale(newValue)
-                    }}
-                    label="Adjustment Rotation"
-                />
-                <hr />
-                <InputSlider
-                    min={0}
-                    max={300}
-                    step={0.01}
-                    value={_offset[0]}
-                    onChange={(newValue) => {
-                        // setOffsetY(newValue)
-                        updateOffset('x', newValue)
-                    }} // Update rotation dynamically
-                    label="Offset X"
-                />
-                <InputSlider
-                    min={0}
-                    max={300}
-                    step={0.01}
-                    value={_offset[1]}
-                    onChange={(newValue) => {
-                        // setOffsetY(newValue)
-                        updateOffset('y', newValue)
-                    }} // Update rotation dynamically
-                    label="Offset Y"
-                />
-                <InputSlider
-                    min={0.001}
-                    max={4}
-                    step={0.01}
-                    value={offsetScale}
-                    onChange={(newValue) => {
-                        setoffsetScale(newValue)
-                    }}
-                    label="Adjustment Offset"
-                />
-            </div>
+                    <InputSlider
+                        min={0}
+                        max={360}
+                        step={0.001}
+                        value={rotation}
+                        onChange={(newValue) => {
+                            setRotation(newValue)
+                        }}
+                        label="Rotation"
+                    />
+                    <InputSlider
+                        min={0.001}
+                        max={4}
+                        step={0.001}
+                        value={rotationScale}
+                        onChange={(newValue) => {
+                            setrotationScale(newValue)
+                        }}
+                        label="Adjustment Rotation"
+                    />
+                    <Divider />
+                    <InputSlider
+                        min={0}
+                        max={300}
+                        step={0.01}
+                        value={_offset[0]}
+                        onChange={(newValue) => {
+                            updateOffset('x', newValue)
+                        }}
+                        label="Offset X"
+                    />
+                    <InputSlider
+                        min={0}
+                        max={300}
+                        step={0.01}
+                        value={_offset[1]}
+                        onChange={(newValue) => {
+                            updateOffset('y', newValue)
+                        }}
+                        label="Offset Y"
+                    />
+                    <InputSlider
+                        min={0.001}
+                        max={4}
+                        step={0.01}
+                        value={offsetScale}
+                        onChange={(newValue) => {
+                            setoffsetScale(newValue)
+                        }}
+                        label="Adjustment Offset"
+                    />
+                </>
+            </ExpandingPanel>
             <div>
                 <SceneComponent
                     antialias
                     onSceneReady={onSceneReady}
-                    id="my-canvas">
+                    id="my-canvas"
+                    style={{
+                        width: '100%',
+                        height: '100%',
+                    }}>
                     {scene && box && (
                         <MaterialRadialSymmetry
                             mesh={box}

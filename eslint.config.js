@@ -18,7 +18,7 @@ export default tseslint.config(
         extends: [
             // js.configs.recommended,
             //...tseslint.configs.recommended,
-            ...storybook.configs['flat/recommended'],
+            // ...storybook.configs['flat/recommended'],
         ],
         files: ['**/*.{ts,tsx}'],
         plugins: {
@@ -27,7 +27,6 @@ export default tseslint.config(
             // 'storybook': storybook,
         },
         rules: {
-            ...storybook.configs['flat/recommended'].rules,
             ...reactHooks.configs.recommended.rules,
             '@typescript-eslint/no-unused-vars': 'warn',
             'import/no-default-export': 'off',
@@ -35,7 +34,7 @@ export default tseslint.config(
                 'warn',
                 { allowConstantExport: true },
             ],
-            'storybook/story-exports': 'warn',
+            //    'storybook/story-exports': 'warn',
         },
     },
     ...tseslint.config({
@@ -46,4 +45,17 @@ export default tseslint.config(
             'filenames-simple/naming-convention': 'off',
         },
     }),
+    ...tseslint.config({
+        // extends: [tsEslint.configs.disableTypeChecked],
+        files: ['**/*.stories.ts'],
+        rules: {
+            ...storybook.configs['flat/recommended'].rules,
+        },
+    }),
+    ...tseslint.config({
+        // extends: [tsEslint.configs.disableTypeChecked],
+        files: ['**/*.tsx'],
+        rules: { 'sort/object-properties': 'off' },
+    }),
+    //
 )

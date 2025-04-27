@@ -5,7 +5,9 @@
         "types": ["node"],
         "sourceMap": true,
         "esModuleInterop": true,
-        "lib": ["dom"]
+        "lib": ["dom"],
+        "declaration": true,
+        "declarationMap": true
     },
     "exclude": ["/node_modules", "scratch", "**/*.tsx"],
     "include": ["./*.ts", "./.storybook/*.ts", "./*.mts", "./*.cts", "./*.json"]
