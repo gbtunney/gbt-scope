@@ -7,11 +7,10 @@ import {
     Scene,
     Vector3,
 } from '@babylonjs/core'
-import { useGSAP } from '@gsap/react'
 import Divider from '@mui/material/Divider'
+import { createTheme, ThemeOptions, ThemeProvider } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
 import SceneComponent from 'babylonjs-hook'
-import { gsap } from 'gsap'
 import { ReactElement, useEffect, useState } from 'react'
 import ExpandingPanel from './gui/ExpandingPanel.tsx'
 import InputSlider from './gui/InputSlider.tsx'
@@ -19,8 +18,45 @@ import MaterialRadialSymmetry, {
     MaterialRadialSymmetryProps,
 } from './MaterialRadialSymmetry.tsx'
 import { CameraConfigPosition, setRotateCameraPosition } from '../helpers.ts'
+export const themeOptions: ThemeOptions = {
+    palette: {
+        mode: 'dark',
+        primary: {
+            main: '#f7f1b3',
+        },
+        secondary: {
+            main: '#66bb6a',
+        },
+        background: {
+            default: '#1a130a',
+            paper: '#1a130a',
+        },
+        text: {
+            primary: '#e8e8e8',
+        },
+        error: {
+            main: '#d32f2f',
+        },
+        divider: '#a6a68b',
+    },
+    typography: {
+        button: {
+            fontFamily: 'Cormorant+Garamond',
+            fontSize: '1rem',
+        },
+        fontSize: 16,
+        fontFamily: 'Source Sans Pro',
+        h1: {
+            fontFamily: 'Cormorant+Garamond',
+        },
 
-gsap.registerPlugin(useGSAP)
+        body2: {
+            fontSize: '.8rem',
+        },
+    },
+}
+const theme = createTheme(themeOptions)
+
 type SceneRadialSymmetryProps = {
     children?: ReactElement
     cameraSettings?: CameraConfigPosition
@@ -113,129 +149,131 @@ const SceneRadialSymmetry = ({
 
     return (
         <>
-            <ExpandingPanel>
-                <>
-                    <Typography>[esc] to reset camera</Typography>
-                    <InputSlider
-                        min={3}
-                        max={20}
-                        step={1}
-                        value={segments}
-                        onChange={(newValue) => {
-                            setSegments(newValue)
-                        }}
-                        label="Segments"
-                    />
-                    <InputSlider
-                        min={0.02}
-                        max={3}
-                        step={0.001}
-                        value={scaleFactor}
-                        onChange={(newValue) => {
-                            setScaleFactor(newValue)
-                        }}
-                        label="Scale Factor"
-                    />
-                    <Divider />
-
-                    <InputSlider
-                        min={0}
-                        max={360}
-                        step={0.001}
-                        value={rotation}
-                        onChange={(newValue) => {
-                            setRotation(newValue)
-                        }}
-                        label="Rotation"
-                    />
-                    <InputSlider
-                        min={0.001}
-                        max={4}
-                        step={0.001}
-                        value={rotationScale}
-                        onChange={(newValue) => {
-                            setrotationScale(newValue)
-                        }}
-                        label="Adjustment Rotation"
-                    />
-                    <Divider />
-                    <InputSlider
-                        min={0}
-                        max={300}
-                        step={0.01}
-                        value={_offset[0]}
-                        onChange={(newValue) => {
-                            updateOffset('x', newValue)
-                        }}
-                        label="Offset X"
-                    />
-                    <InputSlider
-                        min={0}
-                        max={300}
-                        step={0.01}
-                        value={_offset[1]}
-                        onChange={(newValue) => {
-                            updateOffset('y', newValue)
-                        }}
-                        label="Offset Y"
-                    />
-                    <InputSlider
-                        min={0.001}
-                        max={4}
-                        step={0.01}
-                        value={offsetScale}
-                        onChange={(newValue) => {
-                            setoffsetScale(newValue)
-                        }}
-                        label="Adjustment Offset"
-                    />
-                </>
-            </ExpandingPanel>
-            <div>
-                <SceneComponent
-                    antialias
-                    onSceneReady={onSceneReady}
-                    id="my-canvas"
-                    style={{
-                        width: '100%',
-                        height: '100%',
-                    }}>
-                    {scene && box && (
-                        <MaterialRadialSymmetry
-                            mesh={box}
-                            src="uv-checker.png"
-                            segments={segments}
-                            rotation={rotation}
-                            scaleFactor={scaleFactor}
-                            offset={_offset}
-                            rotationScale={rotationScale}
-                            offsetScale={offsetScale}
-                            opacity={0.8}
-                            onInit={(props) => {
-                                console.log(
-                                    'Material initialized with props:',
-                                    props,
-                                )
+            <ThemeProvider theme={theme}>
+                <ExpandingPanel>
+                    <>
+                        <Typography>[esc] to reset camera</Typography>
+                        <InputSlider
+                            min={3}
+                            max={20}
+                            step={1}
+                            value={segments}
+                            onChange={(newValue) => {
+                                setSegments(newValue)
                             }}
+                            label="Segments"
                         />
-                    )}
-                    {children}
-                </SceneComponent>
+                        <InputSlider
+                            min={0.02}
+                            max={3}
+                            step={0.001}
+                            value={scaleFactor}
+                            onChange={(newValue) => {
+                                setScaleFactor(newValue)
+                            }}
+                            label="Scale Factor"
+                        />
+                        <Divider />
+
+                        <InputSlider
+                            min={0}
+                            max={360}
+                            step={0.001}
+                            value={rotation}
+                            onChange={(newValue) => {
+                                setRotation(newValue)
+                            }}
+                            label="Rotation"
+                        />
+                        <InputSlider
+                            min={0.001}
+                            max={4}
+                            step={0.001}
+                            value={rotationScale}
+                            onChange={(newValue) => {
+                                setrotationScale(newValue)
+                            }}
+                            label="Adjustment Rotation"
+                        />
+                        <Divider />
+                        <InputSlider
+                            min={0}
+                            max={300}
+                            step={0.01}
+                            value={_offset[0]}
+                            onChange={(newValue) => {
+                                updateOffset('x', newValue)
+                            }}
+                            label="Offset X"
+                        />
+                        <InputSlider
+                            min={0}
+                            max={300}
+                            step={0.01}
+                            value={_offset[1]}
+                            onChange={(newValue) => {
+                                updateOffset('y', newValue)
+                            }}
+                            label="Offset Y"
+                        />
+                        <InputSlider
+                            min={0.001}
+                            max={4}
+                            step={0.01}
+                            value={offsetScale}
+                            onChange={(newValue) => {
+                                setoffsetScale(newValue)
+                            }}
+                            label="Adjustment Offset"
+                        />
+                    </>
+                </ExpandingPanel>
                 <div>
-                    <p>
-                        This is some dummy text to demonstrate how additional
-                        content can be added to the component. You can replace
-                        this with any relevant information or UI elements as
-                        needed.
-                    </p>
-                    <p>
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                        Integer nec odio. Praesent libero. Sed cursus ante
-                        dapibus diam. Sed nisi. Nulla quis sem at nibh elementum
-                        imperdiet.
-                    </p>
+                    <SceneComponent
+                        antialias
+                        onSceneReady={onSceneReady}
+                        id="my-canvas"
+                        style={{
+                            width: '100%',
+                            height: '100%',
+                        }}>
+                        {scene && box && (
+                            <MaterialRadialSymmetry
+                                mesh={box}
+                                src="uv-checker.png"
+                                segments={segments}
+                                rotation={rotation}
+                                scaleFactor={scaleFactor}
+                                offset={_offset}
+                                rotationScale={rotationScale}
+                                offsetScale={offsetScale}
+                                opacity={0.8}
+                                onInit={(props) => {
+                                    console.log(
+                                        'Material initialized with props:',
+                                        props,
+                                    )
+                                }}
+                            />
+                        )}
+                        {children}
+                    </SceneComponent>
+                    <div>
+                        <p>
+                            This is some dummy text to demonstrate how
+                            additional content can be added to the component.
+                            You can replace this with any relevant information
+                            or UI elements as needed.
+                        </p>
+                        <p>
+                            Lorem ipsum dolor sit amet, consectetur adipiscing
+                            elit. Integer nec odio. Praesent libero. Sed cursus
+                            ante dapibus diam. Sed nisi. Nulla quis sem at nibh
+                            elementum imperdiet.
+                        </p>
+                    </div>
                 </div>
-            </div>
+            </ThemeProvider>
         </>
     )
 }
