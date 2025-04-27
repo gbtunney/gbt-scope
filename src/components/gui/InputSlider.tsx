@@ -1,29 +1,25 @@
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
-import MuiInput from '@mui/material/Input'
+import Input from '@mui/material/Input'
 import Slider, { SliderProps } from '@mui/material/Slider'
-import { styled } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
 import { ReactElement, useState } from 'react'
 import type { Merge } from 'type-fest'
-
-const Input = styled(MuiInput)`
-    width: 42px;
-    color: unset;
-`
 
 export type InputSliderProps = Merge<
     SliderProps,
     {
         value?: number
         label?: string
+        labelWidth?: string
         /** Add an onChange prop */
         onChange?: (value: number) => void
     }
 >
 
 export const InputSlider = ({
-    label,
+    label = undefined,
+    labelWidth = 'calc(100%/5)',
     max = 100,
     min = 0,
     onChange,
@@ -62,14 +58,16 @@ export const InputSlider = ({
     }
 
     return (
-        <Box sx={{ width: 250 }}>
+        <Box>
             <Grid container spacing={2} sx={{ alignItems: 'center' }}>
                 <Typography
+                    noWrap={true}
+                    variant={'body2'}
                     id="input-slider"
                     style={{
                         ...(label === undefined ? { display: 'none' } : {}),
-                    }}
-                    gutterBottom>
+                        width: labelWidth,
+                    }}>
                     {label}
                 </Typography>
                 <Grid size="grow">
@@ -79,6 +77,7 @@ export const InputSlider = ({
                         max={max}
                         step={step}
                         onChange={handleSliderChange}
+                        valueLabelDisplay={'auto'}
                         aria-labelledby="input-slider"
                     />
                 </Grid>

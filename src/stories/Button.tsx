@@ -1,5 +1,4 @@
-import React from 'react'
-
+import { ReactElement } from 'react'
 import './button.css'
 
 export default {}
@@ -23,7 +22,7 @@ export const Button = ({
     primary = false,
     size = 'medium',
     ...props
-}: ButtonProps): React.ReactElement => {
+}: ButtonProps): ReactElement => {
     const mode = primary
         ? 'storybook-button--primary'
         : 'storybook-button--secondary'

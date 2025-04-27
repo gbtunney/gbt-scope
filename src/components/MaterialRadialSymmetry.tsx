@@ -90,13 +90,14 @@ const MaterialRadialSymmetry = ({
         // Load the texture
         const texture = new Texture(src, mesh.getScene(), true, false)
         shaderMaterial.setTexture('uTexture', texture)
-
+        //  shaderMaterial.alpha = 1
+        //    shaderMaterial.tran
         // Set default uniform values
         shaderMaterial.setVector4('resolution', new Vector4(1200, 1200, 1, 1))
         shaderMaterial.setFloat('uOpacity', opacity)
         shaderMaterial.setFloat('segments', segments)
         shaderMaterial.setVector2('uOffset', new Vector2(offset[0], offset[1]))
-        shaderMaterial.setFloat('uRotation', rotation)
+        //  shaderMaterial.setFloat('uRotation', rotation)
         shaderMaterial.setFloat('uOffsetAmount', offsetScale)
         shaderMaterial.setFloat('uRotationAmount', rotationScale)
         shaderMaterial.setFloat('uScaleFactor', scaleFactor)
@@ -130,7 +131,7 @@ const MaterialRadialSymmetry = ({
 
         return (): void => {
             // Cleanup the material when the component unmounts
-            shaderMaterial.dispose()
+            //TODO: this breaks the animation shaderMaterial.dispose()
         }
     }, [
         mesh,
@@ -139,7 +140,7 @@ const MaterialRadialSymmetry = ({
         scaleFactor,
         rotationScale,
         offsetScale,
-        rotation,
+        // rotation,
         offset,
         image_aspect,
         opacity,
@@ -151,6 +152,24 @@ const MaterialRadialSymmetry = ({
         mouse_multiplier,
         onInit,
     ])
+
+    useEffect(() => {
+        if (!src || !mesh) {
+            console.error(
+                'MaterialScope: Texture source (src) and mesh are required.',
+            )
+            return
+        }
+
+        if (materialRef.current !== null) {
+            console.log('updating rot')
+            materialRef.current.setFloat('uRotation', rotation)
+            // Apply the material to the mesh
+            //   mesh.material = shaderMaterial
+            // materialRef.current = shaderMaterial
+        }
+        // Call the onInit callback if provided
+    }, [rotation])
 
     return null // This component doesn't render anything directly
 }
