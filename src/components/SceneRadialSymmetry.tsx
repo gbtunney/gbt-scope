@@ -8,54 +8,17 @@ import {
     Vector3,
 } from '@babylonjs/core'
 import Divider from '@mui/material/Divider'
-import { createTheme, ThemeOptions, ThemeProvider } from '@mui/material/styles'
+import { ThemeProvider } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
 import SceneComponent from 'babylonjs-hook'
 import { ReactElement, useState } from 'react'
 import ExpandingPanel from './gui/ExpandingPanel.tsx'
 import InputSlider from './gui/InputSlider.tsx'
+import theme from './gui/theme.js'
 import MaterialRadialSymmetry, {
     MaterialRadialSymmetryProps,
 } from './MaterialRadialSymmetry.tsx'
 import { CameraConfigPosition, setRotateCameraPosition } from '../helpers.ts'
-export const themeOptions: ThemeOptions = {
-    palette: {
-        background: {
-            default: '#1a130a',
-            paper: '#1a130a',
-        },
-        divider: '#a6a68b',
-        error: {
-            main: '#d32f2f',
-        },
-        mode: 'dark',
-        primary: {
-            main: '#f7f1b3',
-        },
-        secondary: {
-            main: '#66bb6a',
-        },
-        text: {
-            primary: '#e8e8e8',
-        },
-    },
-    typography: {
-        body2: {
-            fontSize: '.8rem',
-        },
-        button: {
-            fontFamily: 'Cormorant+Garamond',
-            fontSize: '1rem',
-        },
-        fontFamily: 'Source Sans Pro',
-        fontSize: 16,
-
-        h1: {
-            fontFamily: 'Cormorant+Garamond',
-        },
-    },
-}
-const theme = createTheme(themeOptions)
 
 type SceneRadialSymmetryProps = {
     children?: ReactElement
