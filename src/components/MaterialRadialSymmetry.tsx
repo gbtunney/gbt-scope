@@ -102,7 +102,6 @@ const MaterialRadialSymmetry = ({
         shaderMaterial.setFloat('uRotationAmount', rotationScale)
         shaderMaterial.setFloat('uScaleFactor', scaleFactor)
         shaderMaterial.setFloat('uImageAspect', image_aspect)
-
         // Apply the material to the mesh
         mesh.material = shaderMaterial
         materialRef.current = shaderMaterial

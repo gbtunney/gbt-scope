@@ -1,7 +1,6 @@
 import { ReactElement, useRef } from 'react'
-//import './App.css'
+import SceneRadialOrthographic from './components/SceneRadialOrthographic.tsx'
 import SceneRadialSymmetry from './components/SceneRadialSymmetry.tsx'
-/** Import Kaleidoscope from './components/Kaleidoscope.tsx' */
 
 function App(): ReactElement {
     const divRef = useRef<HTMLDivElement | null>(null)
@@ -11,6 +10,10 @@ function App(): ReactElement {
             <h2>h2</h2>
             <div ref={divRef}>
                 <SceneRadialSymmetry />
+                <div style={{ width: '50%' }}>
+                    {' '}
+                    <SceneRadialOrthographic aspect_ratio={1.8} />
+                </div>
             </div>
         </>
     ) as ReactElement

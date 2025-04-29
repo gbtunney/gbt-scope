@@ -1,6 +1,6 @@
 import {
-    ArcRotateCamera,
     Color4,
+    FreeCamera,
     HemisphericLight,
     Mesh,
     MeshBuilder,
@@ -11,18 +11,20 @@ import Divider from '@mui/material/Divider'
 import { ThemeProvider } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
 import SceneComponent from 'babylonjs-hook'
-import { ReactElement, useState } from 'react'
+import { CSSProperties, ReactElement, useState } from 'react'
 import ExpandingPanel from './gui/ExpandingPanel.tsx'
 import InputSlider from './gui/InputSlider.tsx'
 import theme from './gui/theme.js'
 import MaterialRadialSymmetry, {
     MaterialRadialSymmetryProps,
 } from './MaterialRadialSymmetry.tsx'
-import { CameraConfigPosition, setRotateCameraPosition } from '../helpers.ts'
+import { CameraOrthoConfig, setOrthoCamera } from '../helpers.ts'
 
 type SceneRadialSymmetryProps = {
+    aspect_ratio?: number | 'parent'
+
     children?: ReactElement
-    cameraSettings?: CameraConfigPosition
+    cameraSettings?: CameraOrthoConfig
 }
 type ControlProps = Pick<
     MaterialRadialSymmetryProps,
@@ -34,16 +36,17 @@ type ControlProps = Pick<
     | 'scaleFactor'
 >
 
-const SceneRadialSymmetry = ({
+const SceneRadialOrthographic = ({
+    aspect_ratio = 1,
     cameraSettings = {
-        enabled: true,
-        hRotation: Math.PI / 2,
-        vRotation: Math.PI / 4,
+        enabled: false,
+        ortho: true,
+        target: [0, 0, 0],
     },
     children,
 }: SceneRadialSymmetryProps): ReactElement => {
     const [scene, setScene] = useState<Scene | null>(null)
-    const [box, setBox] = useState<Mesh | null>(null)
+    const [plane, setPlane] = useState<Mesh | null>(null)
     const [aspect, setAspect] = useState<number>(1)
     const [segments, setSegments] = useState<number>(6)
     const [scaleFactor, setScaleFactor] = useState<number>(1)
@@ -52,6 +55,11 @@ const SceneRadialSymmetry = ({
     const [rotationScale, setRotationScale] = useState<number>(0.2)
     const [_offset, setOffset] = useState<[number, number]>([0, 0])
     const [rotationSpeed, setRotationSpeed] = useState<number>(0)
+    const customStyle: CSSProperties = {
+        background: 'purple',
+        border: '2px solid green',
+        ...(aspect_ratio !== 'parent' ? { aspectRatio: aspect_ratio } : {}),
+    }
 
     const updateOffset = (key: 'x' | 'y', value: number): void => {
         const result: [number, number] =
@@ -62,40 +70,36 @@ const SceneRadialSymmetry = ({
     const onSceneReady = (_scene: Scene): void => {
         _scene.clearColor = new Color4(0, 0, 0, 1)
         setScene(_scene)
-
-        // Create an ArcRotateCamera for zoom and rotation
-        const camera = new ArcRotateCamera(
-            'camera1',
-            0,
-            0,
-            0,
-            Vector3.Zero(),
+        const camera = new FreeCamera(
+            'camera_ortho',
+            new Vector3(0, 0, -10),
             _scene,
         )
-
-        //  camera.mode  = Camera.ORTHOGRAPHIC_CAMERA
-        // Enable mouse/touch controls
-        setRotateCameraPosition(camera, _scene, cameraSettings)
+        setOrthoCamera(_scene, camera, cameraSettings)
         // Add a light
         new HemisphericLight('light', new Vector3(0, 1, 0), _scene)
-
-        // Create a box
-        const boxMesh = MeshBuilder.CreateBox('box', { size: 2 }, _scene)
-        boxMesh.position.y = 1 // Move the box upward by half its height
-        setBox(boxMesh)
-
+        const planeMesh = MeshBuilder.CreatePlane(
+            'plane',
+            {
+                height: _scene.getEngine().getRenderHeight(),
+                width: _scene.getEngine().getRenderWidth(),
+            },
+            _scene,
+        )
+        //planeMesh.position.z=900
+        setPlane(planeMesh)
         // Add event listener to reset camera on Esc key
         const canvas = _scene.getEngine().getRenderingCanvas()
-        if (canvas) {
+        if (canvas && camera !== null) {
             canvas.addEventListener('keydown', (event) => {
                 if (event.key === 'Escape') {
-                    setRotateCameraPosition(camera, _scene, cameraSettings)
+                    setOrthoCamera(_scene, camera, cameraSettings)
                 }
             })
-            // Ensure the canvas can receive keyboard events
-            canvas.tabIndex = 1
+            canvas.tabIndex = 1 // Ensure the canvas can receive keyboard events
         }
     }
+
     return (
         <>
             <ThemeProvider theme={theme}>
@@ -196,7 +200,7 @@ const SceneRadialSymmetry = ({
                         />
                     </>
                 </ExpandingPanel>
-                <div>
+                <div style={customStyle}>
                     <SceneComponent
                         antialias
                         onSceneReady={onSceneReady}
@@ -205,9 +209,9 @@ const SceneRadialSymmetry = ({
                             height: '100%',
                             width: '100%',
                         }}>
-                        {scene && box && (
+                        {scene && plane && (
                             <MaterialRadialSymmetry
-                                mesh={box}
+                                mesh={plane}
                                 src="uv-checker.png"
                                 segments={segments}
                                 rotation={rotation}
@@ -228,24 +232,10 @@ const SceneRadialSymmetry = ({
                         )}
                         {children}
                     </SceneComponent>
-                    <div>
-                        <p>
-                            This is some dummy text to demonstrate how
-                            additional content can be added to the component.
-                            You can replace this with any relevant information
-                            or UI elements as needed.
-                        </p>
-                        <p>
-                            Lorem ipsum dolor sit amet, consectetur adipiscing
-                            elit. Integer nec odio. Praesent libero. Sed cursus
-                            ante dapibus diam. Sed nisi. Nulla quis sem at nibh
-                            elementum imperdiet.
-                        </p>
-                    </div>
                 </div>
             </ThemeProvider>
         </>
     )
 }
 
-export default SceneRadialSymmetry
+export default SceneRadialOrthographic
