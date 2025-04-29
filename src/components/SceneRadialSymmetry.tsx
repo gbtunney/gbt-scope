@@ -11,7 +11,7 @@ import Divider from '@mui/material/Divider'
 import { createTheme, ThemeOptions, ThemeProvider } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
 import SceneComponent from 'babylonjs-hook'
-import { ReactElement, useEffect, useState } from 'react'
+import { ReactElement, useState } from 'react'
 import ExpandingPanel from './gui/ExpandingPanel.tsx'
 import InputSlider from './gui/InputSlider.tsx'
 import MaterialRadialSymmetry, {
@@ -20,6 +20,14 @@ import MaterialRadialSymmetry, {
 import { CameraConfigPosition, setRotateCameraPosition } from '../helpers.ts'
 export const themeOptions: ThemeOptions = {
     palette: {
+        background: {
+            default: '#1a130a',
+            paper: '#1a130a',
+        },
+        divider: '#a6a68b',
+        error: {
+            main: '#d32f2f',
+        },
         mode: 'dark',
         primary: {
             main: '#f7f1b3',
@@ -27,31 +35,23 @@ export const themeOptions: ThemeOptions = {
         secondary: {
             main: '#66bb6a',
         },
-        background: {
-            default: '#1a130a',
-            paper: '#1a130a',
-        },
         text: {
             primary: '#e8e8e8',
         },
-        error: {
-            main: '#d32f2f',
-        },
-        divider: '#a6a68b',
     },
     typography: {
+        body2: {
+            fontSize: '.8rem',
+        },
         button: {
             fontFamily: 'Cormorant+Garamond',
             fontSize: '1rem',
         },
-        fontSize: 16,
         fontFamily: 'Source Sans Pro',
+        fontSize: 16,
+
         h1: {
             fontFamily: 'Cormorant+Garamond',
-        },
-
-        body2: {
-            fontSize: '.8rem',
         },
     },
 }
@@ -85,8 +85,9 @@ const SceneRadialSymmetry = ({
     const [scaleFactor, setScaleFactor] = useState<number>(1)
     const [rotation, setRotation] = useState<number>(0)
     const [offsetScale, setoffsetScale] = useState<number>(0.02)
-    const [rotationScale, setrotationScale] = useState<number>(0.2)
+    const [rotationScale, setRotationScale] = useState<number>(0.2)
     const [_offset, setOffset] = useState<[number, number]>([0, 0])
+    const [rotationSpeed, setRotationSpeed] = useState<number>(0)
 
     const updateOffset = (key: 'x' | 'y', value: number): void => {
         const result: [number, number] =
@@ -132,21 +133,6 @@ const SceneRadialSymmetry = ({
             canvas.tabIndex = 1
         }
     }
-
-    // Animate the rotation property continuously
-    useEffect(() => {
-        let animationFrameId: number
-
-        const animate = (): void => {
-            setRotation((prev) => prev + 0.01) // Increment rotation and keep it within 0-360
-            animationFrameId = requestAnimationFrame(animate)
-        }
-        /** TODO: redo this animationFrameId = requestAnimationFrame(animate) */
-        return (): void => {
-            cancelAnimationFrame(animationFrameId)
-        } // Cleanup on unmount
-    }, [])
-
     return (
         <>
             <ThemeProvider theme={theme}>
@@ -174,7 +160,6 @@ const SceneRadialSymmetry = ({
                             label="Scale Factor"
                         />
                         <Divider />
-
                         <InputSlider
                             min={0}
                             max={360}
@@ -191,9 +176,19 @@ const SceneRadialSymmetry = ({
                             step={0.001}
                             value={rotationScale}
                             onChange={(newValue) => {
-                                setrotationScale(newValue)
+                                setRotationScale(newValue)
                             }}
                             label="Adjustment Rotation"
+                        />{' '}
+                        <InputSlider
+                            min={0}
+                            max={4}
+                            step={0.001}
+                            value={rotationSpeed}
+                            onChange={(newValue) => {
+                                setRotationSpeed(newValue)
+                            }}
+                            label="Rotation Speed"
                         />
                         <Divider />
                         <InputSlider
@@ -234,8 +229,8 @@ const SceneRadialSymmetry = ({
                         onSceneReady={onSceneReady}
                         id="my-canvas"
                         style={{
-                            width: '100%',
                             height: '100%',
+                            width: '100%',
                         }}>
                         {scene && box && (
                             <MaterialRadialSymmetry
@@ -246,6 +241,7 @@ const SceneRadialSymmetry = ({
                                 scaleFactor={scaleFactor}
                                 offset={_offset}
                                 rotationScale={rotationScale}
+                                rotation_speed={rotationSpeed}
                                 offsetScale={offsetScale}
                                 opacity={0.8}
                                 onInit={(props) => {
