@@ -1,6 +1,8 @@
 import {
     ArcRotateCamera,
+    Camera,
     Color3,
+    FreeCamera,
     Scene,
     Vector2,
     Vector3,
@@ -38,7 +40,25 @@ export type CameraConfigPosition = Partial<{
     mouseWheelSpeed: number
     enabled: boolean
 }>
+export type CameraOrthoConfig = { ortho: true } & Pick<
+    CameraConfigPosition,
+    'target' | 'enabled'
+>
+export const setOrthoCamera = (
+    scene: Scene,
+    camera: FreeCamera,
+    { enabled = true, ortho = true, target = [0, 0, 0] }: CameraOrthoConfig,
+): FreeCamera => {
+    camera.setTarget(new Vector3(...target))
+    if (ortho) camera.mode = Camera.ORTHOGRAPHIC_CAMERA
 
+    if (enabled) {
+        camera.attachControl(scene.getEngine().getRenderingCanvas(), true)
+    } else {
+        camera.detachControl()
+    }
+    return camera
+}
 export const setRotateCameraPosition = (
     camera: ArcRotateCamera,
     scene: Scene,
@@ -48,7 +68,7 @@ export const setRotateCameraPosition = (
         mouseWheelSpeed = 0.01,
         position = [x, y, z],
         radius = 10,
-        target = [x, y, z],
+        target = [0, 0, 0],
         vRotation = 0,
     }: CameraConfigPosition,
 ): void => {

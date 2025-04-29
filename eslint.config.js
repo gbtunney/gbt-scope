@@ -30,6 +30,7 @@ export default tseslint.config(
             ...reactHooks.configs.recommended.rules,
             '@typescript-eslint/no-unused-vars': 'warn',
             'import/no-default-export': 'off',
+            'react-hooks/exhaustive-deps': 'error',
             'react-refresh/only-export-components': [
                 'warn',
                 { allowConstantExport: true },
@@ -55,7 +56,13 @@ export default tseslint.config(
     ...tseslint.config({
         // extends: [tsEslint.configs.disableTypeChecked],
         files: ['**/*.tsx'],
-        rules: { 'sort/object-properties': 'off' },
+
+        rules: {
+            'sort/destructuring-properties': [
+                'error',
+                { caseSensitive: false, natural: true },
+            ],
+        },
     }),
     //
 )

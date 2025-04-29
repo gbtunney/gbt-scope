@@ -60,7 +60,7 @@ export default function ExpandingPanel({
     }
 
     return (
-        <Card style={{ width: width, position: 'absolute' }}>
+        <Card style={{ position: 'absolute', width: width }}>
             <CardHeader
                 action={
                     <ExpandMore

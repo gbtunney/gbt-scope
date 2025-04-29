@@ -1,4 +1,5 @@
 import {
+    Animation,
     Mesh,
     ShaderMaterial,
     Texture,
@@ -90,23 +91,57 @@ const MaterialRadialSymmetry = ({
         // Load the texture
         const texture = new Texture(src, mesh.getScene(), true, false)
         shaderMaterial.setTexture('uTexture', texture)
-        //  shaderMaterial.alpha = 1
-        //    shaderMaterial.tran
+
         // Set default uniform values
         shaderMaterial.setVector4('resolution', new Vector4(1200, 1200, 1, 1))
         shaderMaterial.setFloat('uOpacity', opacity)
         shaderMaterial.setFloat('segments', segments)
         shaderMaterial.setVector2('uOffset', new Vector2(offset[0], offset[1]))
-        //  shaderMaterial.setFloat('uRotation', rotation)
+        shaderMaterial.setFloat('uRotation', rotation)
         shaderMaterial.setFloat('uOffsetAmount', offsetScale)
         shaderMaterial.setFloat('uRotationAmount', rotationScale)
         shaderMaterial.setFloat('uScaleFactor', scaleFactor)
         shaderMaterial.setFloat('uImageAspect', image_aspect)
-
         // Apply the material to the mesh
         mesh.material = shaderMaterial
         materialRef.current = shaderMaterial
 
+        // Create an animation for uRotation
+        const scene = mesh.getScene()
+        const rotationAnimation = new Animation(
+            'rotationAnimation',
+            '_floats.uRotation', // The uniform to animate
+            60, // Frames per second
+            Animation.ANIMATIONTYPE_FLOAT,
+            Animation.ANIMATIONLOOPMODE_CYCLE,
+        )
+
+        // Define keyframes for the animation
+        const keyFrames = [
+            { frame: 0, value: 0 }, // Start rotation at 0
+            { frame: 100, value: Math.PI * 2 }, // Complete one full rotation
+        ]
+
+        rotationAnimation.setKeys(keyFrames)
+
+        // Attach the animation to the material
+        shaderMaterial.animations = [rotationAnimation]
+
+        if (rotation_speed > 0) {
+            // Start the animation with speed based on rotation_speed
+            /** Default to 1 if rotation_speed is 0 or undefined */
+            const speedRatio = rotation_speed > 0 ? rotation_speed : 1
+            scene.beginDirectAnimation(
+                shaderMaterial,
+                [rotationAnimation],
+                0,
+                100,
+                true,
+                speedRatio,
+            )
+        } else {
+            scene.stopAnimation(shaderMaterial, 'rotationAnimation')
+        }
         // Call the onInit callback if provided
         if (onInit) {
             onInit({
@@ -131,45 +166,27 @@ const MaterialRadialSymmetry = ({
 
         return (): void => {
             // Cleanup the material when the component unmounts
-            //TODO: this breaks the animation shaderMaterial.dispose()
+            shaderMaterial.dispose()
         }
     }, [
-        mesh,
-        src,
-        segments,
-        scaleFactor,
-        rotationScale,
-        offsetScale,
-        // rotation,
-        offset,
-        image_aspect,
-        opacity,
         blendMode,
-        speed_interval,
-        rotation_speed,
-        offset_speed,
+        image_aspect,
+        mesh,
         mouse_curve,
         mouse_multiplier,
+        offset,
+        offsetScale,
+        offset_speed,
         onInit,
+        opacity,
+        rotation,
+        rotationScale,
+        rotation_speed,
+        scaleFactor,
+        segments,
+        speed_interval,
+        src,
     ])
-
-    useEffect(() => {
-        if (!src || !mesh) {
-            console.error(
-                'MaterialScope: Texture source (src) and mesh are required.',
-            )
-            return
-        }
-
-        if (materialRef.current !== null) {
-            console.log('updating rot')
-            materialRef.current.setFloat('uRotation', rotation)
-            // Apply the material to the mesh
-            //   mesh.material = shaderMaterial
-            // materialRef.current = shaderMaterial
-        }
-        // Call the onInit callback if provided
-    }, [rotation])
 
     return null // This component doesn't render anything directly
 }
