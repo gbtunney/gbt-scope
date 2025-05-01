@@ -39,11 +39,11 @@ varying vec2 vUv;
 const float PI = 3.14159265359;
 
 vec2 adjustUV(vec2 uv, vec2 offset, float rotation) {
-    vec2 uvOffset = uv + offset * uOffsetAmount;
     float cosRot = cos(rotation * uRotationAmount);
     float sinRot = sin(rotation * uRotationAmount);
     mat2 rotMat = mat2(cosRot, -sinRot, sinRot, cosRot);
-    return rotMat * (uvOffset - vec2(0.5)) + vec2(0.5);
+    vec2 rotatedUV = rotMat * (uv - vec2(0.5)) + vec2(0.5); // Apply rotation first
+    return rotatedUV + offset * uOffsetAmount; // Apply offset after rotation
 }
 
 void main() {

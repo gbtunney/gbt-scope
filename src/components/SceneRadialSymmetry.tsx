@@ -49,9 +49,10 @@ const SceneRadialSymmetry = ({
     const [scaleFactor, setScaleFactor] = useState<number>(1)
     const [rotation, setRotation] = useState<number>(0)
     const [offsetScale, setoffsetScale] = useState<number>(0.02)
-    const [rotationScale, setRotationScale] = useState<number>(0.2)
+    const [rotationScale, setRotationScale] = useState<number>(1)
     const [_offset, setOffset] = useState<[number, number]>([0, 0])
     const [rotationSpeed, setRotationSpeed] = useState<number>(0)
+    const [fps, setFPS] = useState<number>(60)
 
     const updateOffset = (key: 'x' | 'y', value: number): void => {
         const result: [number, number] =
@@ -72,8 +73,6 @@ const SceneRadialSymmetry = ({
             Vector3.Zero(),
             _scene,
         )
-
-        //  camera.mode  = Camera.ORTHOGRAPHIC_CAMERA
         // Enable mouse/touch controls
         setRotateCameraPosition(camera, _scene, cameraSettings)
         // Add a light
@@ -136,7 +135,7 @@ const SceneRadialSymmetry = ({
                         <InputSlider
                             min={0}
                             max={360}
-                            step={0.001}
+                            step={0.01}
                             value={rotation}
                             onChange={(newValue) => {
                                 setRotation(newValue)
@@ -194,6 +193,17 @@ const SceneRadialSymmetry = ({
                             }}
                             label="Adjustment Offset"
                         />
+                        <Divider />
+                        <InputSlider
+                            min={10}
+                            max={120}
+                            step={1}
+                            value={fps}
+                            onChange={(newValue) => {
+                                setFPS(newValue)
+                            }}
+                            label="Frames per second"
+                        />
                     </>
                 </ExpandingPanel>
                 <div>
@@ -207,6 +217,7 @@ const SceneRadialSymmetry = ({
                         }}>
                         {scene && box && (
                             <MaterialRadialSymmetry
+                                fps={fps}
                                 mesh={box}
                                 src="uv-checker.png"
                                 segments={segments}
@@ -221,6 +232,12 @@ const SceneRadialSymmetry = ({
                                 onInit={(props) => {
                                     console.log(
                                         'Material initialized with props:',
+                                        props,
+                                    )
+                                }}
+                                onUpdate={(props) => {
+                                    console.log(
+                                        'Material UPDATED with props:',
                                         props,
                                     )
                                 }}

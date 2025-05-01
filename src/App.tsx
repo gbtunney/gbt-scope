@@ -1,4 +1,5 @@
 import { ReactElement, useRef } from 'react'
+import SceneGBTScope from './components/SceneGBTScope.tsx'
 import SceneRadialOrthographic from './components/SceneRadialOrthographic.tsx'
 import SceneRadialSymmetry from './components/SceneRadialSymmetry.tsx'
 
@@ -13,6 +14,11 @@ function App(): ReactElement {
                 <div style={{ width: '50%' }}>
                     {' '}
                     <SceneRadialOrthographic aspect_ratio={1.8} />
+                    <SceneGBTScope
+                        segments={4}
+                        src={'uv-checker.png'}
+                        aspect_ratio={1.8}
+                    />
                 </div>
             </div>
         </>
