@@ -15,23 +15,28 @@ import {
 export type MaterialRadialSymmetryProps = {
     /** The mesh to which the material will be applied */
     mesh: Mesh | null
-    src: string /** Texture URL */
+    /** Texture URL */
+    src: string
     segments?: number
     scaleFactor?: number
+    /** RotationScale is a multiplier for rotation value. Is disregarded if rotationSpeed is on. */
     rotationScale?: number
     offsetScale?: number
     rotation?: number
     offset?: [number, number]
+    /** Aspect ratio for src image file */
     image_aspect?: number
     opacity?: number
     blendMode?: string
     speed_interval?: number
+    /** Rotation Speed will animate if value is greater than 0 */
     rotation_speed?: number
     offset_speed?: number
     mouse_curve?: [number, number]
     mouse_multiplier?: number
     onInit?: (currentProps: MaterialRadialSymmetryProps) => void
     onUpdate?: (currentProps: MaterialRadialSymmetryProps) => void
+    /** Frames per second for running animations */
     fps?: number
 }
 
@@ -96,7 +101,7 @@ const MaterialRadialSymmetry = ({
         speed_interval,
         src,
     ])
-
+    // Only run this effect when the mesh or src changes
     useEffect(() => {
         if (!src || !mesh) {
             console.error(
@@ -153,8 +158,7 @@ const MaterialRadialSymmetry = ({
                 materialRef.current = null
             }
         }
-    }, [src, mesh, getPropsObject, onInit]) // Only run this effect when the mesh or src changes
-
+    }, [src, mesh, getPropsObject, onInit])
     // Effect for updating uniforms and animations
     useEffect(() => {
         if (!materialRef.current || !src || !mesh) {
