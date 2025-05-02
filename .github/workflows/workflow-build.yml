@@ -4,10 +4,10 @@ on:
     push:
         branches:
             - main
+            - development
     pull_request: # Add pull request trigger
         types:
             - opened
-            - synchronize
             - reopened
 
 jobs:
