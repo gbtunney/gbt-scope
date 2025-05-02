@@ -1,9 +1,9 @@
 import type { Preview } from '@storybook/react'
+console.log('JUNK TEST')
 
 const preview: Preview = {
     parameters: {
         actions: { argTypesRegex: '^on.*' },
-
         controls: {
             expanded: false,
             matchers: {
