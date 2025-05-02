@@ -4,29 +4,40 @@ import type { SceneGBTScopeProps } from '../components/SceneGBTScope.tsx'
 /* eslint  sort/object-properties: "off" */
 
 const defaultArgs: SceneGBTScopeProps = {
-    aspect_ratio: 0.5,
-    cameraSettings: {
-        enabled: false,
-        ortho: true,
-        target: [0, 0, 0],
-    },
+    aspect_ratio: 1,
+    resolution: 'screen',
     fps: 60,
     image_aspect: 1,
     offset: [0, 0],
-    offsetScale: 1,
+    offsetScale: 0.02,
     rotation: 0,
     rotation_speed: 0,
     rotationScale: 1,
     scaleFactor: 1,
     segments: 6,
+    tiling: 1,
     src: 'uv-checker.png',
 }
 const meta: Meta<typeof SceneGBTScope> = {
     argTypes: {
+        //  Rotation Settings
+        rotation: {
+            control: { max: 360, min: 0, step: 0.1, type: 'number' },
+            table: { category: 'Rotation Settings' },
+        },
+        rotation_speed: {
+            control: { max: 4, min: 0, step: 0.01, type: 'number' },
+            table: { category: 'Rotation Settings' },
+        },
+        rotationScale: {
+            control: { max: 4, min: 0.001, step: 0.001, type: 'number' },
+            table: { category: 'Rotation Settings' },
+        },
+
         // Group 1: General Settings
         src: {
             control: { type: 'select' },
-            options: ['uv-checker.png', 'Item Two', 'Item Three'],
+            options: ['uv-checker.png', 'gradient4-3.png', 'eel.jpg'],
             table: { category: 'General Settings' },
         },
         aspect_ratio: {
@@ -47,27 +58,17 @@ const meta: Meta<typeof SceneGBTScope> = {
             table: { category: 'General Settings' },
         },
         //  Graphic Settings
+        tiling: {
+            control: { max: 20, min: 1, step: 1, type: 'number' },
+            table: { category: 'Graphic Settings' },
+        },
         scaleFactor: {
-            control: { max: 3, min: 0.02, step: 0.001, type: 'number' },
+            control: { max: 3, min: 0.01, step: 0.1, type: 'number' },
             table: { category: 'Graphic Settings' },
         },
         segments: {
-            control: { max: 20, min: 3, step: 1, type: 'number' },
+            control: { max: 30, min: 1, step: 1, type: 'number' },
             table: { category: 'Graphic Settings' },
-        },
-
-        //  Rotation Settings
-        rotation: {
-            control: { max: 360, min: 0, step: 0.1, type: 'range' },
-            table: { category: 'Rotation Settings' },
-        },
-        rotationScale: {
-            control: { max: 4, min: 0.001, step: 0.001, type: 'number' },
-            table: { category: 'Rotation Settings' },
-        },
-        rotation_speed: {
-            control: { max: 4, min: 0, step: 0.001, type: 'number' },
-            table: { category: 'Rotation Settings' },
         },
 
         // Group 3: Offset Settings
@@ -105,6 +106,15 @@ export const GBTScope_1_1: ScopeStory = {
     args: {
         ...defaultArgs,
         aspect_ratio: 1,
+    },
+}
+// Primary story with all props
+export const GBTScope_1_1B: ScopeStory = {
+    args: {
+        ...defaultArgs,
+        offset: [100, 30],
+        offsetScale: 0.02,
+        name: 'gbtscope1b',
     },
 }
 

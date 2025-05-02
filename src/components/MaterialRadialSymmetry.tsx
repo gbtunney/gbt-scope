@@ -4,19 +4,21 @@ import {
     ShaderMaterial,
     Texture,
     Vector2,
-    Vector4,
 } from '@babylonjs/core'
 import { ReactElement, useCallback, useEffect, useRef } from 'react'
+import { type Dimensions, getResolution } from '../helpers.js'
 import {
     fragmentShader,
     vertexShader,
 } from '../materials/shader-radial-symmetry.js'
 
 export type MaterialRadialSymmetryProps = {
+    name?: string
     /** The mesh to which the material will be applied */
     mesh: Mesh | null
     /** Texture URL */
     src: string
+    dimensions?: Dimensions
     segments?: number
     scaleFactor?: number
     /** RotationScale is a multiplier for rotation value. Is disregarded if rotationSpeed is on. */
@@ -38,15 +40,19 @@ export type MaterialRadialSymmetryProps = {
     onUpdate?: (currentProps: MaterialRadialSymmetryProps) => void
     /** Frames per second for running animations */
     fps?: number
+    /** Tiling factor for the texture */
+    tiling?: number
 }
 
 const MaterialRadialSymmetry = ({
     blendMode = 'normal',
+    dimensions = { height: 1200, width: 1200 },
     fps = 60,
     image_aspect = 1,
     mesh,
     mouse_curve = [0, 1],
     mouse_multiplier = 1,
+    name = 'kaleidoscope',
     offset = [0, 0],
     offset_speed = 0,
     offsetScale = 1,
@@ -60,6 +66,7 @@ const MaterialRadialSymmetry = ({
     segments = 6,
     speed_interval = 0.2,
     src,
+    tiling = 1,
 }: MaterialRadialSymmetryProps): ReactElement | null => {
     const materialRef = useRef<ShaderMaterial | null>(null)
 
@@ -67,10 +74,12 @@ const MaterialRadialSymmetry = ({
     const getPropsObject = useCallback((): MaterialRadialSymmetryProps => {
         return {
             blendMode,
+            dimensions,
             image_aspect,
             mesh,
             mouse_curve,
             mouse_multiplier,
+            name,
             offset,
             offset_speed,
             offsetScale,
@@ -82,13 +91,16 @@ const MaterialRadialSymmetry = ({
             segments,
             speed_interval,
             src,
+            tiling,
         }
     }, [
         blendMode,
+        dimensions,
         image_aspect,
         mesh,
         mouse_curve,
         mouse_multiplier,
+        name,
         offset,
         offset_speed,
         offsetScale,
@@ -100,6 +112,7 @@ const MaterialRadialSymmetry = ({
         segments,
         speed_interval,
         src,
+        tiling,
     ])
     // Only run this effect when the mesh or src changes
     useEffect(() => {
@@ -113,7 +126,7 @@ const MaterialRadialSymmetry = ({
         if (materialRef.current === null) {
             // Create the shader material
             const shaderMaterial = new ShaderMaterial(
-                'kaleidoscopeShader',
+                name,
                 mesh.getScene(),
                 {
                     fragmentSource: fragmentShader,
@@ -133,6 +146,7 @@ const MaterialRadialSymmetry = ({
                         'uRotationAmount',
                         'uScaleFactor',
                         'uImageAspect',
+                        'uTiling',
                     ],
                 },
             )
@@ -153,12 +167,12 @@ const MaterialRadialSymmetry = ({
         return (): void => {
             // Cleanup the material when the component unmounts or when mesh/src changes
             if (materialRef.current !== null) {
-                console.log('Disposing material')
+                console.log('DISPOSING: material name: ', name)
                 materialRef.current.dispose()
                 materialRef.current = null
             }
         }
-    }, [src, mesh, getPropsObject, onInit])
+    }, [src, mesh, name, getPropsObject, onInit])
     // Effect for updating uniforms and animations
     useEffect(() => {
         if (!materialRef.current || !src || !mesh) {
@@ -169,10 +183,8 @@ const MaterialRadialSymmetry = ({
         }
 
         // Update uniforms
-        materialRef.current.setVector4(
-            'resolution',
-            new Vector4(1200, 1200, 1, 1),
-        )
+        materialRef.current.setVector4('resolution', getResolution(dimensions))
+
         materialRef.current.setFloat('uOpacity', opacity)
         materialRef.current.setFloat('segments', segments)
         materialRef.current.setVector2(
@@ -184,6 +196,7 @@ const MaterialRadialSymmetry = ({
         materialRef.current.setFloat('uRotationAmount', rotationScale)
         materialRef.current.setFloat('uScaleFactor', scaleFactor)
         materialRef.current.setFloat('uImageAspect', image_aspect)
+        materialRef.current.setFloat('uTiling', tiling || 1) // Update the tiling uniform
 
         // Create or update the animation for uRotation
         const scene = mesh.getScene()
@@ -225,6 +238,7 @@ const MaterialRadialSymmetry = ({
         }
     }, [
         mesh,
+        dimensions,
         src,
         opacity,
         segments,
@@ -236,6 +250,7 @@ const MaterialRadialSymmetry = ({
         image_aspect,
         rotation_speed,
         fps,
+        tiling, // Add tiling to the dependency array
         onUpdate,
         getPropsObject,
     ]) // Run this effect when any of these props change

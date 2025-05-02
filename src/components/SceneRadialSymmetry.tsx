@@ -50,7 +50,7 @@ const SceneRadialSymmetry = ({
     const [rotation, setRotation] = useState<number>(0)
     const [offsetScale, setoffsetScale] = useState<number>(0.02)
     const [rotationScale, setRotationScale] = useState<number>(1)
-    const [_offset, setOffset] = useState<[number, number]>([0, 0])
+    const [_offset, setOffset] = useState<[number, number]>([22.23, 0])
     const [rotationSpeed, setRotationSpeed] = useState<number>(0)
     const [fps, setFPS] = useState<number>(60)
 
