@@ -32,6 +32,7 @@ uniform float uOffsetAmount;
 uniform float uRotationAmount;
 uniform float uScaleFactor;
 uniform float uImageAspect;
+uniform float uTiling; // New uniform for tiling the entire pattern
 
 // Varying
 varying vec2 vUv;
@@ -47,19 +48,35 @@ vec2 adjustUV(vec2 uv, vec2 offset, float rotation) {
 }
 
 void main() {
+    // Adjust UV coordinates for resolution
     vec2 newUV = (vUv - vec2(0.5)) * resolution.zw + vec2(0.5);
     vec2 uv = newUV * 2.0 - 1.0;
+
+    // Convert to polar coordinates
     float angle = atan(uv.y, uv.x);
     float radius = length(uv);
+
+    // Apply kaleidoscope effect
     float segment = PI * 2.0 / segments;
     angle = mod(angle, segment);
     angle = segment - abs(segment / 2.0 - angle);
     uv = radius * vec2(cos(angle), sin(angle));
+
+    // Scale the pattern
     float scale = 1.0 / uScaleFactor;
-    vec2 adjustedUV = adjustUV(uv * scale + scale, uOffset, uRotation);
+   
+    // Apply tiling to the entire pattern
+    vec2 tiledUV = fract(uv * uTiling); // Wrap the entire pattern based on tiling factor
+
+    // Adjust UV for texture sampling
+    vec2 adjustedUV = adjustUV(tiledUV * scale + scale, uOffset, uRotation);
     vec2 aspectCorrectedUV = vec2(adjustedUV.x, adjustedUV.y * uImageAspect);
+
+    // Sample the texture
     vec4 color = texture2D(uTexture, aspectCorrectedUV);
     color.a *= uOpacity;
+
+    // Output the final color
     gl_FragColor = color;
 }
 `

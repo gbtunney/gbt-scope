@@ -7,80 +7,122 @@ import {
     Scene,
     Vector3,
 } from '@babylonjs/core'
-import Divider from '@mui/material/Divider'
 import { ThemeProvider } from '@mui/material/styles'
-import Typography from '@mui/material/Typography'
+import { Chromable, colorUtils } from '@snailicide/g-library'
 import SceneComponent from 'babylonjs-hook'
-import { ReactElement, useState } from 'react'
-import ExpandingPanel from './gui/ExpandingPanel.tsx'
-import InputSlider from './gui/InputSlider.tsx'
+import { CSSProperties, ReactElement, useEffect, useState } from 'react'
 import theme from './gui/theme.js'
 import MaterialRadialSymmetry, {
     MaterialRadialSymmetryProps,
 } from './MaterialRadialSymmetry.tsx'
-import { CameraConfigPosition, setRotateCameraPosition } from '../helpers.ts'
+import {
+    CameraConfigPosition,
+    type Dimensions,
+    setRotateCameraPosition,
+} from '../helpers.ts'
 
-type SceneRadialSymmetryProps = {
-    children?: ReactElement
+export type SceneRadialSymmetryProps = {
+    /** This is the aspect ratio of the html5canvas */
+    aspect_ratio?: number | 'parent'
     cameraSettings?: CameraConfigPosition
-}
-type ControlProps = Pick<
-    MaterialRadialSymmetryProps,
-    | 'segments'
-    | 'rotation'
-    | 'rotationScale'
-    | 'offsetScale'
-    | 'offset'
-    | 'scaleFactor'
->
+    /** Resolution set to null will default to 1024x1024. value of "screen" will set the resolution to match viewport */
+    resolution?: 'screen' | Dimensions | null
+    bg_color?: Chromable
+} & Omit<MaterialRadialSymmetryProps, 'mesh'>
 
 const SceneRadialSymmetry = ({
+    aspect_ratio = 1,
+    bg_color = 'red',
     cameraSettings = {
         enabled: true,
         hRotation: Math.PI / 2,
         vRotation: Math.PI / 4,
     },
-    children,
+    fps = 60,
+    image_aspect = 1,
+
+    name = 'radial-symmetry',
+    offset = [0, 0],
+    offset_speed = 0,
+    offsetScale = 1,
+    opacity = 1,
+    resolution = null,
+    rotation = 0,
+    rotation_speed = 0,
+    rotationScale = 1,
+    scaleFactor = 1,
+    segments = 6,
+    src = 'uv-checker.png',
+    tiling = 1,
 }: SceneRadialSymmetryProps): ReactElement => {
     const [scene, setScene] = useState<Scene | null>(null)
     const [box, setBox] = useState<Mesh | null>(null)
-    const [aspect, setAspect] = useState<number>(1)
-    const [segments, setSegments] = useState<number>(6)
-    const [scaleFactor, setScaleFactor] = useState<number>(1)
-    const [rotation, setRotation] = useState<number>(0)
-    const [offsetScale, setoffsetScale] = useState<number>(0.02)
-    const [rotationScale, setRotationScale] = useState<number>(1)
     const [_offset, setOffset] = useState<[number, number]>([0, 0])
-    const [rotationSpeed, setRotationSpeed] = useState<number>(0)
-    const [fps, setFPS] = useState<number>(60)
+    const [_dimensions, setDimensions] = useState<Dimensions | undefined>(
+        undefined,
+    )
 
-    const updateOffset = (key: 'x' | 'y', value: number): void => {
-        const result: [number, number] =
-            key === 'x' ? [value, _offset[1]] : [_offset[0], value]
-        setOffset(result)
+    const customStyle: CSSProperties = {
+        backgroundColor: colorUtils.isValidColor(bg_color)
+            ? colorUtils.getChromaColor(bg_color)?.hex()
+            : 'initial',
+        border: '2px solid green',
+        ...(aspect_ratio !== 'parent' ? { aspectRatio: aspect_ratio } : {}),
     }
 
+    useEffect(() => {
+        const offsetTuple: [number, number] = [offset[0], offset[1]]
+        setOffset(offsetTuple)
+    }, [offset])
+
+    useEffect(() => {
+        /* if it takes user inputted dimensions */
+        if (resolution === 'screen' && scene !== null) {
+            const screenDimensions = {
+                height: scene.getEngine().getRenderHeight(),
+                width: scene.getEngine().getRenderWidth(),
+            }
+            setDimensions(screenDimensions)
+        } else if (
+            resolution !== 'screen' &&
+            resolution !== undefined &&
+            resolution !== null
+        ) {
+            setDimensions(resolution)
+        } else {
+            setDimensions(undefined)
+        }
+    }, [resolution, scene])
+
     const onSceneReady = (_scene: Scene): void => {
-        _scene.clearColor = new Color4(0, 0, 0, 1)
+        _scene.clearColor = new Color4(0, 0, 0, 0)
         setScene(_scene)
 
-        // Create an ArcRotateCamera for zoom and rotation
+        // Add ArcRotateCamera
         const camera = new ArcRotateCamera(
-            'camera1',
-            0,
-            0,
-            0,
+            `camera_${name}`,
+            cameraSettings.hRotation === undefined
+                ? Math.PI / 2
+                : cameraSettings.hRotation,
+            cameraSettings.vRotation === undefined
+                ? Math.PI / 4
+                : cameraSettings.vRotation,
+            10,
             Vector3.Zero(),
             _scene,
         )
-        // Enable mouse/touch controls
         setRotateCameraPosition(camera, _scene, cameraSettings)
-        // Add a light
-        new HemisphericLight('light', new Vector3(0, 1, 0), _scene)
 
-        // Create a box
-        const boxMesh = MeshBuilder.CreateBox('box', { size: 2 }, _scene)
-        boxMesh.position.y = 1 // Move the box upward by half its height
+        // Add a light
+        new HemisphericLight(`light_${name}`, new Vector3(0, 1, 0), _scene)
+
+        // Create a box mesh
+        const boxMesh = MeshBuilder.CreateBox(
+            `box_${name}`,
+            { size: 2 },
+            _scene,
+        )
+        boxMesh.position.y = 1
         setBox(boxMesh)
 
         // Add event listener to reset camera on Esc key
@@ -91,122 +133,47 @@ const SceneRadialSymmetry = ({
                     setRotateCameraPosition(camera, _scene, cameraSettings)
                 }
             })
-            // Ensure the canvas can receive keyboard events
-            canvas.tabIndex = 1
+            canvas.tabIndex = 1 // Ensure the canvas can receive keyboard events
+        }
+
+        // Track and remap mouse position
+        if (canvas) {
+            const handleMouseMove = (event: MouseEvent): void => {
+                const rect = canvas.getBoundingClientRect()
+                /** Normalize X to [0, 1] */
+                const mouseX = (event.clientX - rect.left) / rect.width
+                /** Normalize Y to [0, 1] */
+                const mouseY = (event.clientY - rect.top) / rect.height
+
+                // Remap to center at 0 and boundaries at -1 and 1
+                const remappedX = (mouseX - 0.5) * 2
+                const remappedY = (mouseY - 0.5) * 2
+
+                console.log('Mouse Position Remapped:', {
+                    x: remappedX,
+                    y: remappedY,
+                })
+            }
+
+            const handleMouseLeave = (): void => {
+                console.log('Mouse left the canvas')
+            }
+
+            //canvas.addEventListener('mousemove', handleMouseMove)
+            //  canvas.addEventListener('mouseleave', handleMouseLeave)
+
+            // Cleanup event listeners when the scene is disposed
+            _scene.onDisposeObservable.add(() => {
+                canvas.removeEventListener('mousemove', handleMouseMove)
+                canvas.removeEventListener('mouseleave', handleMouseLeave)
+            })
         }
     }
+
     return (
         <>
             <ThemeProvider theme={theme}>
-                <ExpandingPanel>
-                    <>
-                        <Typography>[esc] to reset camera</Typography>
-                        <InputSlider
-                            min={3}
-                            max={20}
-                            step={1}
-                            value={segments}
-                            onChange={(newValue) => {
-                                setSegments(newValue)
-                            }}
-                            label="Segments"
-                        />
-                        <InputSlider
-                            min={0.02}
-                            max={3}
-                            step={0.001}
-                            value={scaleFactor}
-                            onChange={(newValue) => {
-                                setScaleFactor(newValue)
-                            }}
-                            label="Scale Factor"
-                        />
-                        <InputSlider
-                            min={0.001}
-                            max={2}
-                            step={0.001}
-                            value={aspect}
-                            onChange={(newValue) => {
-                                setAspect(newValue)
-                            }}
-                            label="Aspect"
-                        />
-                        <Divider />
-                        <InputSlider
-                            min={0}
-                            max={360}
-                            step={0.01}
-                            value={rotation}
-                            onChange={(newValue) => {
-                                setRotation(newValue)
-                            }}
-                            label="Rotation"
-                        />
-                        <InputSlider
-                            min={0.001}
-                            max={4}
-                            step={0.001}
-                            value={rotationScale}
-                            onChange={(newValue) => {
-                                setRotationScale(newValue)
-                            }}
-                            label="Adjustment Rotation"
-                        />{' '}
-                        <InputSlider
-                            min={0}
-                            max={4}
-                            step={0.001}
-                            value={rotationSpeed}
-                            onChange={(newValue) => {
-                                setRotationSpeed(newValue)
-                            }}
-                            label="Rotation Speed"
-                        />
-                        <Divider />
-                        <InputSlider
-                            min={0}
-                            max={300}
-                            step={0.01}
-                            value={_offset[0]}
-                            onChange={(newValue) => {
-                                updateOffset('x', newValue)
-                            }}
-                            label="Offset X"
-                        />
-                        <InputSlider
-                            min={0}
-                            max={300}
-                            step={0.01}
-                            value={_offset[1]}
-                            onChange={(newValue) => {
-                                updateOffset('y', newValue)
-                            }}
-                            label="Offset Y"
-                        />
-                        <InputSlider
-                            min={0.001}
-                            max={4}
-                            step={0.01}
-                            value={offsetScale}
-                            onChange={(newValue) => {
-                                setoffsetScale(newValue)
-                            }}
-                            label="Adjustment Offset"
-                        />
-                        <Divider />
-                        <InputSlider
-                            min={10}
-                            max={120}
-                            step={1}
-                            value={fps}
-                            onChange={(newValue) => {
-                                setFPS(newValue)
-                            }}
-                            label="Frames per second"
-                        />
-                    </>
-                </ExpandingPanel>
-                <div>
+                <div style={customStyle}>
                     <SceneComponent
                         antialias
                         onSceneReady={onSceneReady}
@@ -217,48 +184,41 @@ const SceneRadialSymmetry = ({
                         }}>
                         {scene && box && (
                             <MaterialRadialSymmetry
-                                fps={fps}
+                                name={`material_${name}`}
                                 mesh={box}
-                                src="uv-checker.png"
+                                src={src}
+                                dimensions={_dimensions}
+                                fps={fps}
                                 segments={segments}
                                 rotation={rotation}
                                 scaleFactor={scaleFactor}
-                                offset={_offset}
+                                tiling={tiling}
+                                offset={offset}
+                                offset_speed={offset_speed}
                                 rotationScale={rotationScale}
-                                rotation_speed={rotationSpeed}
+                                rotation_speed={rotation_speed}
                                 offsetScale={offsetScale}
-                                opacity={0.8}
-                                image_aspect={aspect}
+                                opacity={opacity}
+                                image_aspect={image_aspect}
                                 onInit={(props) => {
                                     console.log(
-                                        'Material initialized with props:',
+                                        'INITIALIZED : Material name:',
+                                        name,
+                                        ' props:',
                                         props,
                                     )
                                 }}
                                 onUpdate={(props) => {
                                     console.log(
-                                        'Material UPDATED with props:',
+                                        'UPDATED : Material name:',
+                                        name,
+                                        ' props:',
                                         props,
                                     )
                                 }}
                             />
                         )}
-                        {children}
                     </SceneComponent>
-                    <div>
-                        <p>
-                            This is some dummy text to demonstrate how
-                            additional content can be added to the component.
-                            You can replace this with any relevant information
-                            or UI elements as needed.
-                        </p>
-                        <p>
-                            Lorem ipsum dolor sit amet, consectetur adipiscing
-                            elit. Integer nec odio. Praesent libero. Sed cursus
-                            ante dapibus diam. Sed nisi. Nulla quis sem at nibh
-                            elementum imperdiet.
-                        </p>
-                    </div>
                 </div>
             </ThemeProvider>
         </>
