@@ -31,29 +31,30 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 // More on writing stories with args: https://storybook.js.org/docs/writing-stories/args
-export const Primary: Story = {
+export const AnimatedLeft: Story = {
     args: {
-        label: 'Button',
-        primary: true,
+        rotation_speed: 0.02,
     },
 }
 
-export const Secondary: Story = {
+export const AnimatedRight: Story = {
     args: {
-        label: 'Button',
+        rotation_speed: -0.02,
     },
 }
 
-export const Large: Story = {
+export const OffsetAnimated_12: Story = {
     args: {
-        label: 'Button',
-        size: 'large',
+        aspect_ratio: 0.5,
+        offset_speed: 0.03,
+        segments: 12,
     },
 }
-
-export const Small: Story = {
+export const Segments_4: Story = {
     args: {
-        label: 'Button',
-        size: 'small',
+        bg_color: 'orange',
+        offset_speed: 0.1,
+        rotation_speed: -0.3,
+        segments: 4,
     },
 }

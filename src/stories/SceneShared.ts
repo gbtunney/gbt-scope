@@ -1,16 +1,21 @@
 import type { Meta } from '@storybook/react'
+import { fn } from '@storybook/test'
 import type { SceneGBTScopeProps } from '../components/SceneGBTScope.tsx'
+
 import { SceneRadialSymmetryProps } from '../components/SceneRadialSymmetry.tsx'
 /* eslint  sort/object-properties: "off" */
 /* eslint filenames-simple/naming-convention: 'off'*/
+
 export const defaultArgs: SceneGBTScopeProps | SceneRadialSymmetryProps = {
     aspect_ratio: 1,
-    resolution: 'screen',
+    resolution: undefined,
+    bg_color: 'green',
     fps: 60,
     image_aspect: 1,
     offset: [0, 0],
     offsetScale: 0.02,
     offset_speed: 0,
+    opacity: 1,
     rotation: 0,
     rotation_speed: 0,
     rotationScale: 1,
@@ -18,9 +23,14 @@ export const defaultArgs: SceneGBTScopeProps | SceneRadialSymmetryProps = {
     segments: 6,
     tiling: 1,
     src: 'uv-checker.png',
+    onUpdate: fn(),
+
+    onInit: fn(),
 }
 
 export const argTypes: Meta['argTypes'] = {
+    bg_color: { control: 'color' },
+    resolution: { control: 'object' },
     //  Rotation Settings
     rotation: {
         control: { max: 360, min: 0, step: 0.1, type: 'number' },
@@ -69,6 +79,10 @@ export const argTypes: Meta['argTypes'] = {
     },
     segments: {
         control: { max: 30, min: 1, step: 1, type: 'number' },
+        table: { category: 'Graphic Settings' },
+    },
+    opacity: {
+        control: { max: 1, min: 0, step: 0.01, type: 'number' },
         table: { category: 'Graphic Settings' },
     },
 

@@ -8,6 +8,7 @@ import {
     Vector3,
 } from '@babylonjs/core'
 import { ThemeProvider } from '@mui/material/styles'
+import { Chromable, colorUtils } from '@snailicide/g-library'
 import SceneComponent from 'babylonjs-hook'
 import { CSSProperties, ReactElement, useEffect, useState } from 'react'
 import theme from './gui/theme.js'
@@ -19,21 +20,25 @@ import {
     type Dimensions,
     setRotateCameraPosition,
 } from '../helpers.ts'
+
 export type SceneRadialSymmetryProps = {
+    /** This is the aspect ratio of the html5canvas */
     aspect_ratio?: number | 'parent'
     cameraSettings?: CameraConfigPosition
+    /** Resolution set to null will default to 1024x1024. value of "screen" will set the resolution to match viewport */
     resolution?: 'screen' | Dimensions | null
+    bg_color?: Chromable
 } & Omit<MaterialRadialSymmetryProps, 'mesh'>
 
 const SceneRadialSymmetry = ({
     aspect_ratio = 1,
+    bg_color = 'red',
     cameraSettings = {
         enabled: true,
         hRotation: Math.PI / 2,
         vRotation: Math.PI / 4,
     },
     fps = 60,
-
     image_aspect = 1,
 
     name = 'radial-symmetry',
@@ -56,8 +61,11 @@ const SceneRadialSymmetry = ({
     const [_dimensions, setDimensions] = useState<Dimensions | undefined>(
         undefined,
     )
+
     const customStyle: CSSProperties = {
-        background: 'purple',
+        backgroundColor: colorUtils.isValidColor(bg_color)
+            ? colorUtils.getChromaColor(bg_color)?.hex()
+            : 'initial',
         border: '2px solid green',
         ...(aspect_ratio !== 'parent' ? { aspectRatio: aspect_ratio } : {}),
     }
@@ -87,7 +95,7 @@ const SceneRadialSymmetry = ({
     }, [resolution, scene])
 
     const onSceneReady = (_scene: Scene): void => {
-        _scene.clearColor = new Color4(0, 0, 0, 1)
+        _scene.clearColor = new Color4(0, 0, 0, 0)
         setScene(_scene)
 
         // Add ArcRotateCamera
@@ -151,8 +159,8 @@ const SceneRadialSymmetry = ({
                 console.log('Mouse left the canvas')
             }
 
-            canvas.addEventListener('mousemove', handleMouseMove)
-            canvas.addEventListener('mouseleave', handleMouseLeave)
+            //canvas.addEventListener('mousemove', handleMouseMove)
+            //  canvas.addEventListener('mouseleave', handleMouseLeave)
 
             // Cleanup event listeners when the scene is disposed
             _scene.onDisposeObservable.add(() => {
@@ -179,6 +187,7 @@ const SceneRadialSymmetry = ({
                                 name={`material_${name}`}
                                 mesh={box}
                                 src={src}
+                                dimensions={_dimensions}
                                 fps={fps}
                                 segments={segments}
                                 rotation={rotation}

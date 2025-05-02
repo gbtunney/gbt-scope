@@ -8,6 +8,7 @@ import {
     Vector3,
 } from '@babylonjs/core'
 import { ThemeProvider } from '@mui/material/styles'
+import { Chromable, colorUtils } from '@snailicide/g-library'
 import SceneComponent from 'babylonjs-hook'
 import { CSSProperties, ReactElement, useEffect, useState } from 'react'
 import theme from './gui/theme.js'
@@ -23,34 +24,28 @@ import {
 export type SceneGBTScopeProps = {
     /** This is the aspect ratio of the html5canvas */
     aspect_ratio?: number | 'parent'
-    scale?: number
     cameraSettings?: CameraOrthoConfig
+    /** Resolution set to null will default to 1024x1024. value of "screen" will set the resolution to match viewport */
     resolution?: 'screen' | Dimensions | null
+    bg_color?: Chromable
 } & Omit<MaterialRadialSymmetryProps, 'mesh' | 'dimensions'>
-type ControlProps = Pick<
-    MaterialRadialSymmetryProps,
-    | 'segments'
-    | 'rotation'
-    | 'rotationScale'
-    | 'offsetScale'
-    | 'offset'
-    | 'scaleFactor'
->
 
 const SceneGBTScope = ({
     aspect_ratio = 1,
+    //={width:1024,height:1024},
+    bg_color = 'red',
     cameraSettings = {
         enabled: false,
         ortho: true,
         target: [0, 0, 0],
     },
-    //={width:1024,height:1024},
     fps = 60,
     image_aspect = 1,
     name = 'kaleidoscope',
     offset = [0, 0],
     offset_speed = 0,
     offsetScale = 1,
+    opacity = 1,
     resolution = 'screen',
     rotation = 0,
     rotation_speed = 0,
@@ -67,7 +62,9 @@ const SceneGBTScope = ({
         undefined,
     )
     const customStyle: CSSProperties = {
-        background: 'purple',
+        backgroundColor: colorUtils.isValidColor(bg_color)
+            ? colorUtils.getChromaColor(bg_color)?.hex()
+            : 'initial',
         border: '2px solid green',
         ...(aspect_ratio !== 'parent' ? { aspectRatio: aspect_ratio } : {}),
     }
@@ -193,7 +190,7 @@ const SceneGBTScope = ({
                                 rotationScale={rotationScale}
                                 rotation_speed={rotation_speed}
                                 offsetScale={offsetScale}
-                                opacity={0.8}
+                                opacity={opacity}
                                 image_aspect={image_aspect}
                                 onInit={(props) => {
                                     console.log(

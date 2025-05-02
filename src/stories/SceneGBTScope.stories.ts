@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { argTypes, defaultArgs } from './SceneShared.ts'
+
 import SceneGBTScope from '../components/SceneGBTScope.tsx'
 /* eslint  sort/object-properties: "off" */
 
@@ -16,6 +17,7 @@ const meta: Meta<typeof SceneGBTScope> = {
             ortho: true,
             target: [0, 0, 0],
         },
+        resolution: 'screen',
     },
     tags: ['autodocs'],
     title: 'Example/SceneGBTScope',
