@@ -1,0 +1,31 @@
+name: 🐌 Snailicide PRE PR TO MAIN CHECK
+on:
+    pull_request:
+        branches:
+            - main # Trigger on pull requests targeting the main branch
+
+jobs:
+    build:
+        name: 'Build / Archive 🏗️'
+        runs-on: ubuntu-latest
+        steps:
+            - run: echo 'Archive Snailicide Monorepo 🐌';
+
+            - name: Checkout 🛎️
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: Setup Node.js environment 🛎️
+              uses: actions/setup-node@v4
+              with:
+                  node-version: '21.7.3'
+
+            - name: Install pnpm 🔧
+              run: |
+                  npm install -g pnpm
+                  pnpm install --no-frozen-lockfile
+
+            - name: Build, Lint and Unit Tests 🚨
+              run: |
+                  echo "a pull request was targeted triggered only!!"
