@@ -10,7 +10,7 @@ function App(): ReactElement {
             <h1>Babylon</h1>
             <h2>h2</h2>
             <div ref={divRef}>
-                <SceneRadialSymmetry />
+                <SceneRadialSymmetry src={'uv-checker.png'} />
                 <div style={{ width: '50%' }}>
                     {' '}
                     <SceneRadialOrthographic aspect_ratio={1.8} />

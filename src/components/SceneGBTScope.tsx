@@ -66,6 +66,11 @@ const SceneGBTScope = ({
     const [_dimensions, setDimensions] = useState<Dimensions | undefined>(
         undefined,
     )
+    const customStyle: CSSProperties = {
+        background: 'purple',
+        border: '2px solid green',
+        ...(aspect_ratio !== 'parent' ? { aspectRatio: aspect_ratio } : {}),
+    }
     useEffect(() => {
         const offsetTuple: [number, number] = [offset[0], offset[1]]
         setOffset(offsetTuple)
@@ -90,11 +95,6 @@ const SceneGBTScope = ({
         }
     }, [resolution, scene])
 
-    const customStyle: CSSProperties = {
-        background: 'purple',
-        border: '2px solid green',
-        ...(aspect_ratio !== 'parent' ? { aspectRatio: aspect_ratio } : {}),
-    }
     const getCanvasSize = (_scene: Scene): number => {
         const { height, width } = {
             height: _scene.getEngine().getRenderHeight(),
@@ -141,19 +141,14 @@ const SceneGBTScope = ({
         // Track and remap mouse position
         if (canvas) {
             const handleMouseMove = (event: MouseEvent): void => {
+                console.log('<OUSEEEEE MOVEEEE')
+                const mouse_curve: [number, number] = [0, 1]
+                const mouse_multiplier = 1
                 const rect = canvas.getBoundingClientRect()
                 /** Normalize X to [0, 1] */
                 const mouseX = (event.clientX - rect.left) / rect.width
                 /** Normalize Y to [0, 1] */
                 const mouseY = (event.clientY - rect.top) / rect.height
-
-                // Remap to center at 0.5 and boundaries at -1 and 1
-                /** Map to [-1, 1] */
-                const remappedX = (mouseX - 0.5) * 2
-                /** Map to [-1, 1] */
-                const remappedY = (mouseY - 0.5) * 2
-
-                // console.log('Remapped Mouse Position:', { x: remappedX, y: remappedY })
             }
 
             const handleMouseLeave = (): void => {
@@ -162,7 +157,6 @@ const SceneGBTScope = ({
 
             canvas.addEventListener('mousemove', handleMouseMove)
             canvas.addEventListener('mouseleave', handleMouseLeave)
-
             // Cleanup event listeners when the scene is disposed
             _scene.onDisposeObservable.add(() => {
                 canvas.removeEventListener('mousemove', handleMouseMove)
