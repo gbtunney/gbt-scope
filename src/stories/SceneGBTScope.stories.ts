@@ -10,6 +10,7 @@ const defaultArgs: SceneGBTScopeProps = {
     image_aspect: 1,
     offset: [0, 0],
     offsetScale: 0.02,
+    offset_speed: 0,
     rotation: 0,
     rotation_speed: 0,
     rotationScale: 1,
@@ -26,7 +27,7 @@ const meta: Meta<typeof SceneGBTScope> = {
             table: { category: 'Rotation Settings' },
         },
         rotation_speed: {
-            control: { max: 4, min: 0, step: 0.01, type: 'number' },
+            control: { max: 4, min: -4, step: 0.01, type: 'number' },
             table: { category: 'Rotation Settings' },
         },
         rotationScale: {
@@ -76,6 +77,11 @@ const meta: Meta<typeof SceneGBTScope> = {
             control: { type: 'object' },
             table: { category: 'Offset Settings' },
         },
+        offset_speed: {
+            control: { max: 4, min: -4, step: 0.01, type: 'number' },
+            table: { category: 'Offset Settings' },
+        },
+
         offsetScale: {
             control: { max: 4, min: 0.001, step: 0.01, type: 'number' },
             table: { category: 'Offset Settings' },

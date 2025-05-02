@@ -184,42 +184,91 @@ const MaterialRadialSymmetry = ({
 
         // Update uniforms
         materialRef.current.setVector4('resolution', getResolution(dimensions))
-
         materialRef.current.setFloat('uOpacity', opacity)
         materialRef.current.setFloat('segments', segments)
-        materialRef.current.setVector2(
-            'uOffset',
-            new Vector2(offset[0], offset[1]),
-        )
         materialRef.current.setFloat('uRotation', rotation)
         materialRef.current.setFloat('uOffsetAmount', offsetScale)
         materialRef.current.setFloat('uRotationAmount', rotationScale)
         materialRef.current.setFloat('uScaleFactor', scaleFactor)
         materialRef.current.setFloat('uImageAspect', image_aspect)
-        materialRef.current.setFloat('uTiling', tiling || 1) // Update the tiling uniform
-
-        // Create or update the animation for uRotation
-        const scene = mesh.getScene()
-        const rotationAnimation = new Animation(
-            'rotationAnimation',
-            '_floats.uRotation', // The uniform to animate
-            fps, // Frames per second
-            Animation.ANIMATIONTYPE_FLOAT,
-            Animation.ANIMATIONLOOPMODE_CYCLE,
+        materialRef.current.setFloat('uTiling', tiling || 1)
+        materialRef.current.setVector2(
+            'uOffset',
+            new Vector2(offset[0], offset[1]),
         )
+        const scene = mesh.getScene()
 
-        const keyFrames = [
-            { frame: 0, value: 0 }, // Start rotation at 0
-            { frame: 100, value: (Math.PI * 2) / rotationScale }, // Complete one full rotation
-        ]
+        let animationArray: Array<Animation> = []
+        // Create or update the animation for uOffset
+        if (offset_speed !== 0) {
+            const offsetAnimation = new Animation(
+                'offsetAnimation',
+                '_vectors2.uOffset', // The uniform to animate
+                fps, // Frames per second
+                Animation.ANIMATIONTYPE_VECTOR2,
+                Animation.ANIMATIONLOOPMODE_CYCLE,
+            )
 
-        rotationAnimation.setKeys(keyFrames)
+            const offset_keyFrames = [
+                { frame: 0, value: new Vector2(offset[0], offset[1]) }, // Start at initial offset
+                {
+                    frame: 100,
+                    value: new Vector2(
+                        dimensions.width * (offset_speed < 0 ? -1 : 1), //* ( offset_speed * 100 / fps),
+                        //200,200
+                        dimensions.height * (offset_speed < 0 ? -1 : 1),
+                        //  offset[1] + offset_speed * 100 / fps,
+                    ), // End offset after 100 frames
+                },
+            ]
 
-        // Attach the animation to the material
-        materialRef.current.animations = [rotationAnimation]
+            offsetAnimation.setKeys(offset_keyFrames)
+            animationArray = [...animationArray, offsetAnimation]
 
-        if (rotation_speed > 0) {
-            const speedRatio = rotation_speed > 0 ? rotation_speed : 1
+            // Start the animation
+            scene.beginDirectAnimation(
+                materialRef.current,
+                [offsetAnimation],
+                0,
+                100,
+                true,
+                Math.abs(offset_speed),
+            )
+        } else {
+            scene.stopAnimation(materialRef.current, 'offsetAnimation')
+        }
+
+        if (rotation_speed !== 0) {
+            // Create or update the animation for uRotation
+            const rotationAnimation = new Animation(
+                'rotationAnimation',
+                '_floats.uRotation', // The uniform to animate
+                fps, // Frames per second
+                Animation.ANIMATIONTYPE_FLOAT,
+                Animation.ANIMATIONLOOPMODE_CYCLE,
+            )
+
+            const rotation_keyFrames = [
+                { frame: 0, value: 0 }, // Start rotation at 0
+                {
+                    frame: 100,
+                    value:
+                        ((Math.PI * 2) / rotationScale) *
+                        (rotation_speed < 0 ? -1 : 1),
+                }, // Complete one full rotation
+            ]
+
+            console.log(
+                '(math vlue ',
+                ((Math.PI * 2) / rotationScale) * (rotation_speed < 0 ? -1 : 1),
+            )
+            rotationAnimation.setKeys(rotation_keyFrames)
+
+            // Attach the animation to the material
+
+            animationArray = [...animationArray, rotationAnimation]
+            const speedRatio =
+                rotation_speed !== 0 ? Math.abs(rotation_speed) : 1
             scene.beginDirectAnimation(
                 materialRef.current,
                 [rotationAnimation],
@@ -232,6 +281,8 @@ const MaterialRadialSymmetry = ({
             scene.stopAnimation(materialRef.current, 'rotationAnimation')
         }
 
+        materialRef.current.animations = animationArray
+
         // Call the onUpdate callback if provided
         if (onUpdate) {
             onUpdate(getPropsObject())
@@ -243,6 +294,7 @@ const MaterialRadialSymmetry = ({
         opacity,
         segments,
         offset,
+        offset_speed, // Add offset_speed to the dependency array
         rotation,
         offsetScale,
         rotationScale,
@@ -250,10 +302,10 @@ const MaterialRadialSymmetry = ({
         image_aspect,
         rotation_speed,
         fps,
-        tiling, // Add tiling to the dependency array
+        tiling,
         onUpdate,
         getPropsObject,
-    ]) // Run this effect when any of these props change
+    ])
 
     return null // This component doesn't render anything directly
 }

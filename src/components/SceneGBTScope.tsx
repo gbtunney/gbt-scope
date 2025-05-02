@@ -49,6 +49,7 @@ const SceneGBTScope = ({
     image_aspect = 1,
     name = 'kaleidoscope',
     offset = [0, 0],
+    offset_speed = 0,
     offsetScale = 1,
     resolution = 'screen',
     rotation = 0,
@@ -94,7 +95,6 @@ const SceneGBTScope = ({
         border: '2px solid green',
         ...(aspect_ratio !== 'parent' ? { aspectRatio: aspect_ratio } : {}),
     }
-
     const getCanvasSize = (_scene: Scene): number => {
         const { height, width } = {
             height: _scene.getEngine().getRenderHeight(),
@@ -106,14 +106,17 @@ const SceneGBTScope = ({
     const onSceneReady = (_scene: Scene): void => {
         _scene.clearColor = new Color4(0, 0, 0, 1)
         setScene(_scene)
+
         const camera = new FreeCamera(
             `camera_${name}`,
             new Vector3(0, 0, -10),
             _scene,
         )
         setOrthoCamera(_scene, camera, cameraSettings)
+
         // Add a light
         new HemisphericLight(`light_${name}`, new Vector3(0, 1, 0), _scene)
+
         const planeMesh = MeshBuilder.CreatePlane(
             `plane_${name}`,
             {
@@ -122,7 +125,6 @@ const SceneGBTScope = ({
             },
             _scene,
         )
-        //planeMesh.position.z=900
         setPlane(planeMesh)
 
         // Add event listener to reset camera on Esc key
@@ -134,6 +136,38 @@ const SceneGBTScope = ({
                 }
             })
             canvas.tabIndex = 1 // Ensure the canvas can receive keyboard events
+        }
+
+        // Track and remap mouse position
+        if (canvas) {
+            const handleMouseMove = (event: MouseEvent): void => {
+                const rect = canvas.getBoundingClientRect()
+                /** Normalize X to [0, 1] */
+                const mouseX = (event.clientX - rect.left) / rect.width
+                /** Normalize Y to [0, 1] */
+                const mouseY = (event.clientY - rect.top) / rect.height
+
+                // Remap to center at 0.5 and boundaries at -1 and 1
+                /** Map to [-1, 1] */
+                const remappedX = (mouseX - 0.5) * 2
+                /** Map to [-1, 1] */
+                const remappedY = (mouseY - 0.5) * 2
+
+                // console.log('Remapped Mouse Position:', { x: remappedX, y: remappedY })
+            }
+
+            const handleMouseLeave = (): void => {
+                console.log('Mouse left the canvas')
+            }
+
+            canvas.addEventListener('mousemove', handleMouseMove)
+            canvas.addEventListener('mouseleave', handleMouseLeave)
+
+            // Cleanup event listeners when the scene is disposed
+            _scene.onDisposeObservable.add(() => {
+                canvas.removeEventListener('mousemove', handleMouseMove)
+                canvas.removeEventListener('mouseleave', handleMouseLeave)
+            })
         }
     }
 
@@ -161,6 +195,7 @@ const SceneGBTScope = ({
                                 scaleFactor={scaleFactor}
                                 tiling={tiling}
                                 offset={_offset}
+                                offset_speed={offset_speed}
                                 rotationScale={rotationScale}
                                 rotation_speed={rotation_speed}
                                 offsetScale={offsetScale}
