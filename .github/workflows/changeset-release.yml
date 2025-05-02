@@ -18,12 +18,14 @@ jobs:
             HUSKY: 0
         steps:
             - name: Checkout Repo 🛎️
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
 
             - name: Setup Node.js environment 🛎️
-              uses: actions/setup-node@v3.8.1
+              uses: actions/setup-node@v4
               with:
-                  node-version: '20.11.1'
+                  node-version: '21.7.3'
 
             - name: Install pnpm 🔧
               env:
@@ -38,6 +40,13 @@ jobs:
             - run: |
                   git status
                   git branch
+
+            - name: Run Chromatic 🌴
+              uses: chromaui/action@latest
+              with:
+                  # ⚠️ Make sure to configure a `CHROMATIC_PROJECT_TOKEN` repository secret
+                  projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+                  buildScriptName: 'build:storybook'
 
             - name: Create Release Pull Request
               uses: changesets/action@v1
