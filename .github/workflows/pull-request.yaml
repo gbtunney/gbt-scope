@@ -1,9 +1,9 @@
 name: 🐌 Snailicide Chromatic Visual Testing
+
 on:
-    pull_request: # Add pull request trigger
+    pull_request:
         branches:
-            - release-candidate/**/*
-            - release-candidate/**
+            - main # Trigger only on pull requests targeting 'main'
 
         types:
             - opened
@@ -14,6 +14,7 @@ jobs:
     chromatic:
         name: 'Run Chromatic on PR 🌴'
         runs-on: ubuntu-latest
+        if: startsWith(github.head_ref, 'release-candidate/') # Ensure the source branch is prefixed with 'release-candidate/'
         steps:
             - name: Checkout 🛎️
               uses: actions/checkout@v4

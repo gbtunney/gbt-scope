@@ -36,11 +36,35 @@ jobs:
 
             - name: 🔍 Preview Tags
               if: steps.detect.outputs.merged == 'true'
+              id: preview-tags
               run: |
-                  pnpm changeset tag --dry-run
+                  pnpm changeset tag --dry-run | grep -o 'v[0-9]*\.[0-9]*\.[0-9]*' > new-tags.txt
+                  echo "Generated tags:"
+                  cat new-tags.txt
+
+            - name: 🏷️ Check Existing Tags
+              if: steps.detect.outputs.merged == 'true'
+              id: check-tags
+              run: |
+                  EXISTING_TAGS=$(git ls-remote --tags origin | grep -o 'refs/tags/v[0-9]*\.[0-9]*\.[0-9]*' | sed 's|refs/tags/||')
+                  echo "Existing tags:"
+                  echo "$EXISTING_TAGS"
+
+                  NEW_TAGS=$(cat new-tags.txt)
+                  TAGS_TO_PUSH=""
+                  for TAG in $NEW_TAGS; do
+                      if echo "$EXISTING_TAGS" | grep -q "$TAG"; then
+                          echo "ℹ️ Tag $TAG already exists. Skipping."
+                      else
+                          echo "✅ Tag $TAG does not exist. Will push."
+                          TAGS_TO_PUSH="$TAGS_TO_PUSH $TAG"
+                      fi
+                  done
+
+                  echo "tags_to_push=$TAGS_TO_PUSH" >> $GITHUB_OUTPUT
 
             - name: 🏷️ Tag & Push
-              if: steps.detect.outputs.merged == 'true'
+              if: steps.detect.outputs.merged == 'true' && steps.check-tags.outputs.tags_to_push != ''
               run: |
                   pnpm changeset tag
                   git push origin --tags
