@@ -25,6 +25,6 @@ jobs:
               with:
                   # ⚠️ Make sure to configure a `CHROMATIC_PROJECT_TOKEN` repository secret
                   projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
-                  buildScriptName: 'build:storybook'
+                  buildScriptName: 'docs:build'
 
             - run: echo "🍏 This job's status is ${{ job.status }}."
