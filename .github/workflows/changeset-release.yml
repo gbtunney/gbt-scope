@@ -41,6 +41,11 @@ jobs:
               run: |
                   pnpm run build && pnpm run fix && pnpm run check && pnpm test
 
+            - name: 🛠️ Build Docs (Post-Version Bump)
+              run: |
+                  echo "📚 Building updated documentation..."
+                  pnpm run docs
+
             - name: 🧹 Ensure Clean Repository
               id: check_dirty
               run: |
@@ -55,14 +60,19 @@ jobs:
                     echo "✅ Repository is clean on branch '$BRANCH_NAME'."
                   fi
 
-            - name: 📘 Build Docs (test)
+            - name: 🧠 Compute release-changeset branch name
+              id: release_branch
               run: |
-                  pnpm run docs
+                  SRC_BRANCH="${{ github.event.pull_request.head.ref }}"
+                  CHG_BRANCH="${SRC_BRANCH/release-candidate/release-changeset}"
+                  echo "branch_name=$CHG_BRANCH" >> $GITHUB_OUTPUT
 
             - name: 📝 Create Release Pull Request
               uses: changesets/action@v1
               with:
-                  commit: 'release(root): this commit was created by changesets'
+                  commit: 'chore(release): this release commit was created by changesets'
+                  title: '🔖 Release: Changesets'
+                  branch: ${{ steps.release_branch.outputs.branch_name }}
               env:
                   HUSKY: 0
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
