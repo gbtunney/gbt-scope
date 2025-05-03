@@ -24,6 +24,7 @@ jobs:
             - name: 🛠️ Run Fix and Build Docs
               run: |
                   echo "🧼 Running fix & 📝 building docs..."
+                  pnpm run build:ts
                   pnpm run fix || true
                   pnpm run docs
 
@@ -33,9 +34,11 @@ jobs:
                   if [ -n "$(git status --porcelain)" ]; then
                     echo "dirty=true" >> $GITHUB_OUTPUT
                     echo "⚠️ Repo has uncommitted changes after build."
+                    echo "🧾 Dirty files:"
+                    git status --porcelain
                   else
                     echo "dirty=false" >> $GITHUB_OUTPUT
-                    echo "✅ Repo is still clean after build. No commit needed."
+                    echo "✅ Repo is still clean after build."
                   fi
 
             - name: 💾 Commit Updated Docs
@@ -44,7 +47,7 @@ jobs:
                   echo "📦 Committing docs..."
                   git config user.name "github-actions[bot]"
                   git config user.email "github-actions[bot]@users.noreply.github.com"
-                  git add docs/
+                  git add .
                   if git diff --cached --quiet; then
                     echo "✅ No docs changes to commit."
                   else
