@@ -1,0 +1,28 @@
+name: 🏷️ Push Changeset Tags
+
+on:
+    workflow_run:
+        workflows: ['🐌 Snailicide Release']
+        types:
+            - completed
+
+jobs:
+    tag:
+        if: ${{ github.event.workflow_run.conclusion == 'success' }}
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: 🧰 Setup & Install
+              run: |
+                  npm install -g pnpm
+                  pnpm install
+
+            - name: 🏷️ Tag and Push
+              run: |
+                  pnpm changeset tag
+                  git push origin --tags
+                  echo "✅ Tags pushed successfully!"

@@ -1,41 +1,46 @@
 name: 🐌 Snailicide Release
+
 on:
-    push:
+    pull_request:
+        types: [closed]
         branches:
-            - 'main'
-concurrency: ${{ github.workflow }}-${{ github.ref }}
+            - main
 
 jobs:
     release:
-        name: 'Release Changeset🚀'
+        if: >
+            github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'release-candidate/')
+
         runs-on: ubuntu-latest
+        concurrency: ${{ github.workflow }}-${{ github.ref }}
+
         permissions:
             contents: write
             pull-requests: write
             repository-projects: write
+
         env:
             HUSKY: 0
+
         steps:
-            - name: Checkout Repo 🛎️
+            - name: 🛎️ Checkout Repo
               uses: actions/checkout@v4
 
-            - name: Setup Node.js environment 🛎️
+            - name: 🧱 Setup Node.js environment
               uses: actions/setup-node@v4
               with:
                   node-version: '21.7.3'
 
-            - name: Install pnpm 🔧
-              env:
-                  HUSKY: 0
+            - name: 🔧 Install pnpm
               run: |
                   npm install -g pnpm
                   pnpm install
 
-            - name: Build, Lint and Unit Tests 🚨
+            - name: 🚨 Build, Lint and Unit Tests
               run: |
-                  pnpm run build && pnpm run fix && pnpm run check && pnpm test && pnpm run docs
+                  pnpm run build && pnpm run fix && pnpm run check && pnpm test
 
-            - name: Ensure Clean Repository 🧹
+            - name: 🧹 Ensure Clean Repository
               run: |
                   BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
                   if [ -n "$(git status --porcelain)" ]; then
@@ -44,21 +49,15 @@ jobs:
                   else
                     echo "✅ Repository is clean on branch '$BRANCH_NAME'."
                   fi
-            - name: Create Release Pull Request
+
+            - name: 📘 Build Docs (test)
+              run: |
+                  pnpm run docs
+
+            - name: 📝 Create Release Pull Request
               uses: changesets/action@v1
               with:
                   commit: 'release(root): this commit was created by changesets'
               env:
                   HUSKY: 0
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-            - name: Tag Versions 🏷️
-              # You can do something when a publish should happen.
-              run: |
-                  pnpm changeset tag
-                  git push origin --tags
-                  echo "✅ Repository changeset version is now bumped!"
-
-            - run: |
-                  echo "✅ Repository changeset version is now officially bumped!";
-                  echo "🍏 This job's status is ${{ job.status }}."

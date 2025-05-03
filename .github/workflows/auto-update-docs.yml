@@ -1,0 +1,53 @@
+name: 📘 Auto Build & Commit Docs (Post-Build Check)
+
+on:
+    push:
+        branches:
+            - 'changeset-release/**'
+
+jobs:
+    build-docs-if-needed:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: 🛎️ Checkout code
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: 🧱 Setup Node.js & Install Dependencies
+              run: |
+                  echo "🔧 Installing pnpm and project dependencies..."
+                  npm install -g pnpm
+                  pnpm install
+
+            - name: 🛠️ Run Fix and Build Docs
+              run: |
+                  echo "🧼 Running fix & 📝 building docs..."
+                  pnpm run fix || true
+                  pnpm run docs
+
+            - name: 🧼 Check if repo is dirty after build
+              id: check_dirty
+              run: |
+                  if [ -n "$(git status --porcelain)" ]; then
+                    echo "dirty=true" >> $GITHUB_OUTPUT
+                    echo "⚠️ Repo has uncommitted changes after build."
+                  else
+                    echo "dirty=false" >> $GITHUB_OUTPUT
+                    echo "✅ Repo is still clean after build. No commit needed."
+                  fi
+
+            - name: 💾 Commit Updated Docs
+              if: steps.check_dirty.outputs.dirty == 'true'
+              run: |
+                  echo "📦 Committing docs..."
+                  git config user.name "github-actions[bot]"
+                  git config user.email "github-actions[bot]@users.noreply.github.com"
+                  git add docs/
+                  if git diff --cached --quiet; then
+                    echo "✅ No docs changes to commit."
+                  else
+                    git commit -m "docs(root): auto-update docs on version bump"
+                    git push origin HEAD
+                    echo "🚀 Docs updated and pushed!"
