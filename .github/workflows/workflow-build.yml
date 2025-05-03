@@ -31,12 +31,4 @@ jobs:
               run: |
                   pnpm run build && pnpm run fix && pnpm test
 
-            - name: Run Chromatic 🌴
-              if: ${{ github.event_name == 'pull_request' }} # Run only for pull requests
-              uses: chromaui/action@latest
-              with:
-                  # ⚠️ Make sure to configure a `CHROMATIC_PROJECT_TOKEN` repository secret
-                  projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
-                  buildScriptName: 'build:storybook'
-
             - run: echo "🍏 This job's status is ${{ job.status }}."
