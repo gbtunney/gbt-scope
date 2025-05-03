@@ -1,6 +1,8 @@
 //import './button.css'
 import type { Meta, StoryObj } from '@storybook/react'
-import SceneRadialSymmetry, { SceneRadialSymmetryProps } from './../components/SceneRadialSymmetry.tsx'
+import SceneRadialSymmetry, {
+    SceneRadialSymmetryProps,
+} from './../components/SceneRadialSymmetry.tsx'
 import { argTypes, defaultArgs } from './SceneShared.ts'
 
 // More on how to set up stories at: https://storybook.js.org/docs/writing-stories#default-export
@@ -27,9 +29,7 @@ const meta: Meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/**
- * Helper function to disable animations in Chromatic
- */
+/** Helper function to disable animations in Chromatic */
 const disableAnimationsForChromatic = (
     args: Partial<SceneRadialSymmetryProps>,
 ): Partial<SceneRadialSymmetryProps> => {
@@ -37,7 +37,8 @@ const disableAnimationsForChromatic = (
         return {
             ...args,
             // Disable rotation animations
-            offset_speed: 0, rotation_speed: 0, // Disable offset animations
+            offset_speed: 0,
+            rotation_speed: 0, // Disable offset animations
         }
     }
     return args
