@@ -64,8 +64,10 @@ jobs:
               id: release_branch
               run: |
                   SRC_BRANCH="${{ github.event.pull_request.head.ref }}"
-                  CHG_BRANCH="${SRC_BRANCH/release-candidate/release-changeset}"
+                  SUFFIX=$(echo "$SRC_BRANCH" | sed 's|release-candidate/||')
+                  CHG_BRANCH="changeset-release/$SUFFIX"
                   echo "branch_name=$CHG_BRANCH" >> $GITHUB_OUTPUT
+                  echo "🔧 Computed branch name: $CHG_BRANCH"
 
             - name: 📝 Create Release Pull Request
               uses: changesets/action@v1
@@ -73,6 +75,7 @@ jobs:
                   commit: 'chore(release): this release commit was created by changesets'
                   title: '🔖 Release: Changesets'
                   branch: ${{ steps.release_branch.outputs.branch_name }}
+                  base: main
               env:
                   HUSKY: 0
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
