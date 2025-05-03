@@ -3,6 +3,7 @@ on:
     pull_request: # Add pull request trigger
         branches:
             - release-candidate/**/*
+            - release-candidate/**
 
         types:
             - opened
