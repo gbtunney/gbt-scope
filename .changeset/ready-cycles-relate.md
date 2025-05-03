@@ -2,4 +2,4 @@
 'gbt-scope': patch
 ---
 
-initial project commit
+iiniitial commit
