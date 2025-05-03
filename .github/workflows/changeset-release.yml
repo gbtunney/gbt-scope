@@ -41,11 +41,6 @@ jobs:
               run: |
                   pnpm run build && pnpm run fix && pnpm run check && pnpm test
 
-            - name: 🛠️ Build Docs (Post-Version Bump)
-              run: |
-                  echo "📚 Building updated documentation..."
-                  pnpm run docs
-
             - name: 🧹 Ensure Clean Repository
               id: check_dirty
               run: |
@@ -59,6 +54,11 @@ jobs:
                     echo "dirty=false" >> $GITHUB_OUTPUT
                     echo "✅ Repository is clean on branch '$BRANCH_NAME'."
                   fi
+
+            - name: 🛠️ Build Docs (Post-Version Bump)
+              run: |
+                  echo "📚 testing updated documentation..."
+                  pnpm run docs
 
             - name: 🧠 Compute release-changeset branch name
               id: release_branch
