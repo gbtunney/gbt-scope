@@ -52,7 +52,7 @@ export const OffsetAnimated_12: Story = {
 }
 export const Segments_4: Story = {
     args: {
-        bg_color: 'orange',
+        bg_color: 'yellow',
         offset_speed: 0.1,
         rotation_speed: -0.3,
         segments: 4,
