@@ -1,0 +1,47 @@
+name: 🏷️ Tag After Changeset Merge
+
+on:
+    push:
+        branches:
+            - main
+
+jobs:
+    tag-if-release-merged:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 2
+
+            - name: 🔍 Detect if a changeset-release/* was merged
+              id: detect
+              run: |
+                  BASE=$(git rev-parse HEAD^)
+                  MERGED_BRANCH=$(git log --format=%B -n 1 $BASE | grep -o 'changeset-release/[^ ]*' || true)
+
+                  if [ -n "$MERGED_BRANCH" ]; then
+                    echo "merged=true" >> $GITHUB_OUTPUT
+                    echo "📌 Detected merge from: $MERGED_BRANCH"
+                  else
+                    echo "merged=false" >> $GITHUB_OUTPUT
+                    echo "ℹ️ No changeset-release branch found in merge history"
+                  fi
+
+            - name: 🧰 Setup
+              if: steps.detect.outputs.merged == 'true'
+              run: |
+                  npm install -g pnpm
+                  pnpm install
+
+            - name: 🔍 Preview Tags
+              if: steps.detect.outputs.merged == 'true'
+              run: |
+                  pnpm changeset tag --dry-run
+
+            - name: 🏷️ Tag & Push
+              if: steps.detect.outputs.merged == 'true'
+              run: |
+                  pnpm changeset tag
+                  git push origin --tags
+                  echo "✅ Tags pushed after changeset merge!"

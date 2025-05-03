@@ -3,7 +3,7 @@ name: 📘 Auto Build & Commit Docs (Post-Build Check)
 on:
     push:
         branches:
-            - 'changeset-release/**'
+            - 'changeset-release/**/*'
 
 jobs:
     build-docs-if-needed:
