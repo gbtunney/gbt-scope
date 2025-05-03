@@ -9,7 +9,7 @@ on:
 jobs:
     release:
         if: >
-            github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'release-candidate/')
+            github.event.pull_request.merged == true && contains(github.event.pull_request.head.label, 'release-candidate/')
 
 
         runs-on: ubuntu-latest
