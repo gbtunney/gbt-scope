@@ -1,5 +1,11 @@
 # gbt-scope
 
+## 0.0.3
+
+### Patch Changes
+
+- ed46f5e: stupif test stuff
+
 ## 0.0.2
 
 ### Patch Changes
