@@ -1,15 +1,15 @@
-name: 🐌 Snailicide Build
+name: 🐌 Snailicide Chromatic Visual Testing
 on:
-    push:
-        branches:
-            - main
+    pull_request: # Add pull request trigger
+        types:
+            - opened
+            - reopened
+
 jobs:
-    build:
-        name: 'Build 🏗️'
+    chromatic:
+        name: 'Run Chromatic on PR 🌴'
         runs-on: ubuntu-latest
         steps:
-            - run: echo 'Archive Snailicide Monorepo 🐌';
-
             - name: Checkout 🛎️
               uses: actions/checkout@v4
               with:
@@ -20,17 +20,7 @@ jobs:
               with:
                   node-version: '21.7.3'
 
-            - name: Install pnpm 🔧
-              run: |
-                  npm install -g pnpm
-                  pnpm install --no-frozen-lockfile
-
-            - name: Build, Lint and Unit Tests 🚨
-              run: |
-                  pnpm run build && pnpm run fix && pnpm test
-
             - name: Run Chromatic 🌴
-              if: ${{ github.event_name == 'pull_request' }} # Run only for pull requests
               uses: chromaui/action@latest
               with:
                   # ⚠️ Make sure to configure a `CHROMATIC_PROJECT_TOKEN` repository secret
