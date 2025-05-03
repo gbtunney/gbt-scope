@@ -3,6 +3,8 @@ on:
     push:
         branches:
             - main
+            - 'release-candidate/*' # Trigger on release-candidate branches
+            - development
 jobs:
     build:
         name: 'Build 🏗️'
