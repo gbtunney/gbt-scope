@@ -4,6 +4,7 @@ on:
         branches:
             - main
             - 'release-candidate/**/*' # Trigger on release-candidate branches
+            - 'changeset-release/**/*'
             - development
 jobs:
     build:
