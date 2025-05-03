@@ -15,7 +15,7 @@ jobs:
               with:
                   fetch-depth: 0
 
-            - name: 🧱 Setup Node.js & Install Dependencies
+            - name: 🧱 Setup Node.js & Install Dependencies!
               run: |
                   echo "🔧 Installing pnpm and project dependencies..."
                   npm install -g pnpm
