@@ -1,8 +1,8 @@
 name: 🐌 Snailicide Chromatic Visual Testing
 on:
     pull_request: # Add pull request trigger
-        branches-ignore:
-            - changeset-release/**/*
+        branches:
+            - release-candidate/**/*
 
         types:
             - opened
