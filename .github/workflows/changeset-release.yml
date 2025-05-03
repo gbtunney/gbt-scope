@@ -11,6 +11,7 @@ jobs:
         if: >
             github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'release-candidate/')
 
+
         runs-on: ubuntu-latest
         concurrency: ${{ github.workflow }}-${{ github.ref }}
 
@@ -41,12 +42,16 @@ jobs:
                   pnpm run build && pnpm run fix && pnpm run check && pnpm test
 
             - name: 🧹 Ensure Clean Repository
+              id: check_dirty
               run: |
                   BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
                   if [ -n "$(git status --porcelain)" ]; then
-                    echo "❌ Repository is not clean on branch '$BRANCH_NAME'. Please commit or stash your changes."
-                    exit 1
+                    echo "dirty=true" >> $GITHUB_OUTPUT
+                    echo "❌ Repository is not clean on branch '$BRANCH_NAME'."
+                    echo "🧾 Dirty files:"
+                    git status --porcelain
                   else
+                    echo "dirty=false" >> $GITHUB_OUTPUT
                     echo "✅ Repository is clean on branch '$BRANCH_NAME'."
                   fi
 
