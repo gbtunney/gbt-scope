@@ -34,6 +34,7 @@ const disableAnimationsForChromatic = (
     args: Partial<SceneRadialSymmetryProps>,
 ): Partial<SceneRadialSymmetryProps> => {
     if (process.env['CHROMATIC']) {
+        console.log('CHROMATIC DISABLED')
         return {
             ...args,
             // Disable rotation animations
