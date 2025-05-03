@@ -1,0 +1,37 @@
+name: 🐌 Snailicide Chromatic Visual Testing
+on:
+    pull_request: # Add pull request trigger
+        types:
+            - opened
+            - reopened
+
+jobs:
+    chromatic:
+        name: 'Run Chromatic on PR 🌴'
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout 🛎️
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
+            - name: Setup Node.js environment 🛎️
+              uses: actions/setup-node@v4
+              with:
+                  node-version: '21.7.3'
+
+            - name: Install pnpm 🔧
+              env:
+                  HUSKY: 0
+              run: |
+                  npm install -g pnpm
+                  pnpm install
+
+            - name: Run Chromatic 🌴
+              uses: chromaui/action@latest
+              with:
+                  # ⚠️ Make sure to configure a `CHROMATIC_PROJECT_TOKEN` repository secret
+                  projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+                  buildScriptName: 'docs:build'
+
+            - run: echo "🍏 This job's status is ${{ job.status }}."

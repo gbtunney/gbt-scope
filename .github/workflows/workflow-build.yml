@@ -1,18 +1,13 @@
-name: 🐌 Snailicide
-run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
+name: 🐌 Snailicide Build
 on:
     push:
         branches:
             - main
+            - 'release-candidate/*' # Trigger on release-candidate branches
             - development
-    pull_request: # Add pull request trigger
-        types:
-            - opened
-            - reopened
-
 jobs:
     build:
-        name: 'Build / Archive 🏗️'
+        name: 'Build 🏗️'
         runs-on: ubuntu-latest
         steps:
             - run: echo 'Archive Snailicide Monorepo 🐌';
@@ -34,14 +29,6 @@ jobs:
 
             - name: Build, Lint and Unit Tests 🚨
               run: |
-                  pnpm run build && pnpm run fix && pnpm run check && pnpm test
-
-            - name: Run Chromatic 🌴
-              if: ${{ github.event_name == 'pull_request' }} # Run only for pull requests
-              uses: chromaui/action@latest
-              with:
-                  # ⚠️ Make sure to configure a `CHROMATIC_PROJECT_TOKEN` repository secret
-                  projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
-                  buildScriptName: 'build:storybook'
+                  pnpm run build && pnpm run fix && pnpm test
 
             - run: echo "🍏 This job's status is ${{ job.status }}."

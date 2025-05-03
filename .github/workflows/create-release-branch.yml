@@ -1,0 +1,93 @@
+name: 🐌 Create Release Branch
+
+on:
+    push:
+        tags:
+            - '**' # Match all tags, including scoped ones with slashes
+
+jobs:
+    create-release-branch:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: 🛎️ Checkout code
+              uses: actions/checkout@v3
+              with:
+                  fetch-depth: 0
+
+            - name: 🔍 Extract tag name and commit
+              run: |
+                  FULL_TAG="${GITHUB_REF#refs/tags/}"
+                  echo "📌 Tag detected: $FULL_TAG"
+                  echo "FULL_TAG=$FULL_TAG" >> $GITHUB_ENV
+
+                  COMMIT_SHA=$(git rev-list -n 1 "$FULL_TAG")
+                  echo "🧱 Tag points to commit: $COMMIT_SHA"
+                  echo "COMMIT_SHA=$COMMIT_SHA" >> $GITHUB_ENV
+
+            - name: 🧪 Validate tag format
+              run: |
+                  if [[ ! "$FULL_TAG" =~ @.+@.+ ]]; then
+                    echo "⚠️ Skipping tag '$FULL_TAG' — doesn't match expected pattern (e.g. @scope/pkg@1.2.3 or pkg@1.2.3)"
+                    exit 0
+                  fi
+
+            - name: 📋 List tags on this commit
+              run: |
+                  TAGS=$(git tag --points-at "$COMMIT_SHA" | sort)
+                  COUNT=$(echo "$TAGS" | wc -l)
+                  FIRST_TAG=$(echo "$TAGS" | head -n 1)
+                  echo "$TAGS" > tags.txt
+
+                  echo "📦 Total tags on this commit: $COUNT"
+                  echo "🏷️ Tags: $TAGS"
+                  echo "🎯 Primary tag chosen: $FIRST_TAG"
+
+                  echo "COUNT=$COUNT" >> $GITHUB_ENV
+                  echo "FIRST_TAG=$FIRST_TAG" >> $GITHUB_ENV
+
+            - name: ⏭️ Skip if not primary tag
+              if: env.FULL_TAG != env.FIRST_TAG
+              run: |
+                  echo "🚫 Skipping. Not the first tag on this commit."
+                  exit 0
+
+            - name: 🧠 Determine release branch name
+              run: |
+                  VERSION="${FULL_TAG##*@}"       # get version after last "@"
+                  DATE=$(date +%Y-%m-%d)
+
+                  if [ "$COUNT" -eq 1 ]; then
+                    PKG="${FULL_TAG%@*}"          # strip version
+                    PKG="${PKG#@}"                # strip leading @
+                    PKG="${PKG//\//-}"            # replace / with -
+                    BRANCH="release-${PKG}-${VERSION}"
+                    echo "🧁 Single package release detected: $PKG"
+                  else
+                    BRANCH="release-${DATE}-${VERSION}"
+                    echo "🍱 Multi-package release — using date-based branch name"
+                  fi
+
+                  echo "📂 Branch to create: $BRANCH"
+                  echo "RELEASE_BRANCH=$BRANCH" >> $GITHUB_ENV
+
+            - name: 🔎 Check if release branch exists
+              run: |
+                  if git ls-remote --exit-code --heads origin "$RELEASE_BRANCH"; then
+                    echo "🛑 Branch '$RELEASE_BRANCH' already exists. Skipping."
+                    exit 0
+                  fi
+
+            - name: 🌿 Checkout main
+              uses: actions/checkout@v3
+              with:
+                  ref: main
+                  fetch-depth: 0
+
+            - name: 🚀 Create and push release branch
+              run: |
+                  git config user.name "github-actions[bot]"
+                  git config user.email "github-actions[bot]@users.noreply.github.com"
+                  git checkout -b "$RELEASE_BRANCH"
+                  git push origin "$RELEASE_BRANCH"
+                  echo "✅ Release branch '$RELEASE_BRANCH' created and pushed!"

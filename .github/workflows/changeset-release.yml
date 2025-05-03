@@ -1,5 +1,4 @@
 name: 🐌 Snailicide Release
-run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
 on:
     push:
         branches:
@@ -8,7 +7,7 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
     release:
-        name: 'Changeset 🚀'
+        name: 'Release Changeset🚀'
         runs-on: ubuntu-latest
         permissions:
             contents: write
@@ -34,11 +33,17 @@ jobs:
 
             - name: Build, Lint and Unit Tests 🚨
               run: |
-                  pnpm run build && pnpm run fix && pnpm run check && pnpm test
-            - run: |
-                  git status
-                  git branch
+                  pnpm run build && pnpm run fix && pnpm run check && pnpm test && pnpm run docs
 
+            - name: Ensure Clean Repository 🧹
+              run: |
+                  BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
+                  if [ -n "$(git status --porcelain)" ]; then
+                    echo "❌ Repository is not clean on branch '$BRANCH_NAME'. Please commit or stash your changes."
+                    exit 1
+                  else
+                    echo "✅ Repository is clean on branch '$BRANCH_NAME'."
+                  fi
             - name: Create Release Pull Request
               uses: changesets/action@v1
               with:
@@ -52,5 +57,8 @@ jobs:
               run: |
                   pnpm changeset tag
                   git push origin --tags
+                  echo "✅ Repository changeset version is now bumped!"
 
-            - run: echo "🍏 This job's status is ${{ job.status }}."
+            - run: |
+                  echo "✅ Repository changeset version is now officially bumped!";
+                  echo "🍏 This job's status is ${{ job.status }}."
