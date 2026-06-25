@@ -24,7 +24,7 @@
         "clean:build": "pnpm exec rm -rf ./dist ./types storybook-static",
         "\n========== TEST >> ==========": "",
         "test": "echo '\"\\n===\\n>> Unit Test:: no test specified!'",
-        "chromatic": "npx chromatic --project-token=chpt_6be402f4f5a7153 --build-script-name docs:build",
+        "chromatic": "pnpm exec chromatic --project-token=chpt_6be402f4f5a7153 --build-script-name docs:build",
         "\n========== COMMIT >> ==========": "",
         "commit": "pnpm build:ts && pnpm exec git-cz",
         "prepare:all": "pnpm run fix",
