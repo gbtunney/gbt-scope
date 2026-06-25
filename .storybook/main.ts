@@ -16,11 +16,12 @@ function getAbsolutePath(value: string): string {
 
 const config: StorybookConfig = {
     addons: [
-        getAbsolutePath('@storybook/addon-essentials'),
-        getAbsolutePath('@storybook/addon-onboarding'),
-        getAbsolutePath('@storybook/addon-interactions'),
-        getAbsolutePath('@chromatic-com/storybook'),
-    ],
+    getAbsolutePath('@storybook/addon-docs'),
+    getAbsolutePath('@storybook/addon-vitest'),
+    getAbsolutePath('@chromatic-com/storybook'),
+    //getAbsolutePath('@storybook/addon-onboarding')
+          //  getAbsolutePath('@chromatic-com/storybook'),
+],
     framework: {
         name: getAbsolutePath('@storybook/react-vite'),
         options: {},

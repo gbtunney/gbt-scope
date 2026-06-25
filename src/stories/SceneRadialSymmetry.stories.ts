@@ -1,7 +1,7 @@
 //import './button.css'
 import type { Meta, StoryObj } from '@storybook/react'
 import SceneRadialSymmetry, {
-    SceneRadialSymmetryProps,
+   type SceneRadialSymmetryProps,
 } from './../components/SceneRadialSymmetry.tsx'
 import { argTypes, defaultArgs } from './SceneShared.ts'
 

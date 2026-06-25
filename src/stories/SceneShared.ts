@@ -2,7 +2,7 @@ import type { Meta } from '@storybook/react'
 import { fn } from '@storybook/test'
 import type { SceneGBTScopeProps } from '../components/SceneGBTScope.tsx'
 
-import { SceneRadialSymmetryProps } from '../components/SceneRadialSymmetry.tsx'
+import { type SceneRadialSymmetryProps } from '../components/SceneRadialSymmetry.tsx'
 /* eslint  sort/object-properties: "off" */
 /* eslint filenames-simple/naming-convention: 'off'*/
 
