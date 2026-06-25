@@ -17,9 +17,9 @@ import ExpandingPanel from './gui/ExpandingPanel.tsx'
 import InputSlider from './gui/InputSlider.tsx'
 import theme from './gui/theme.js'
 import MaterialRadialSymmetry, {
-    MaterialRadialSymmetryProps,
+  type  MaterialRadialSymmetryProps,
 } from './MaterialRadialSymmetry.tsx'
-import { CameraOrthoConfig, setOrthoCamera } from '../helpers.ts'
+import {type  CameraOrthoConfig, setOrthoCamera } from '../helpers.ts'
 
 type SceneRadialSymmetryProps = {
     aspect_ratio?: number | 'parent'

@@ -8,15 +8,15 @@ import {
     Vector3,
 } from '@babylonjs/core'
 import { ThemeProvider } from '@mui/material/styles'
-import { Chromable, colorUtils } from '@snailicide/g-library'
+import {type Chromable, colorUtils } from '@snailicide/g-library'
 import SceneComponent from 'babylonjs-hook'
 import { CSSProperties, ReactElement, useEffect, useState } from 'react'
 import theme from './gui/theme.js'
 import MaterialRadialSymmetry, {
-    MaterialRadialSymmetryProps,
+    type MaterialRadialSymmetryProps,
 } from './MaterialRadialSymmetry.tsx'
 import {
-    CameraConfigPosition,
+   type CameraConfigPosition,
     type Dimensions,
     setRotateCameraPosition,
 } from '../helpers.ts'
