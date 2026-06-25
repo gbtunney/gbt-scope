@@ -40,7 +40,7 @@ export type CameraConfigPosition = Partial<{
     mouseWheelSpeed: number
     enabled: boolean
 }>
-export type CameraOrthoConfig = { ortho: true } & Pick<
+export type CameraOrthoConfig = { ortho?: true } & Pick<
     CameraConfigPosition,
     'target' | 'enabled'
 >

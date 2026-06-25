@@ -5,18 +5,19 @@ import {
     Mesh,
     MeshBuilder,
     Scene,
+    ShaderMaterial,
     Vector3,
 } from '@babylonjs/core'
 import { ThemeProvider } from '@mui/material/styles'
-import { Chromable, colorUtils } from '@snailicide/g-library'
+import { type Chromable, colorUtils } from '@snailicide/g-library'
 import SceneComponent from 'babylonjs-hook'
 import { CSSProperties, ReactElement, useEffect, useState } from 'react'
 import theme from './gui/theme.js'
 import MaterialRadialSymmetry, {
-    MaterialRadialSymmetryProps,
+    type MaterialRadialSymmetryProps,
 } from './MaterialRadialSymmetry.tsx'
 import {
-    CameraOrthoConfig,
+   type CameraOrthoConfig,
     type Dimensions,
     setOrthoCamera,
 } from '../helpers.ts'
@@ -41,6 +42,8 @@ const SceneGBTScope = ({
     },
     fps = 60,
     image_aspect = 1,
+    mouse_curve = [0, 0.015] as [number, number],
+    mouse_multiplier = 0.01,
     name = 'kaleidoscope',
     offset = [0, 0],
     offset_speed = 0,
@@ -135,31 +138,40 @@ const SceneGBTScope = ({
             canvas.tabIndex = 1 // Ensure the canvas can receive keyboard events
         }
 
-        // Track and remap mouse position
+        // Mouse state — plain object so the observable closure always reads current values
+        const mouseState = { x: 0, y: 0 }
+
         if (canvas) {
             const handleMouseMove = (event: MouseEvent): void => {
-                console.log('<OUSEEEEE MOVEEEE')
-                const mouse_curve: [number, number] = [0, 1]
-                const mouse_multiplier = 1
                 const rect = canvas.getBoundingClientRect()
-                /** Normalize X to [0, 1] */
-                const mouseX = (event.clientX - rect.left) / rect.width
-                /** Normalize Y to [0, 1] */
-                const mouseY = (event.clientY - rect.top) / rect.height
+                mouseState.x = ((event.clientX - rect.left) / rect.width) * 2 - 1
+                mouseState.y = ((event.clientY - rect.top) / rect.height) * 2 - 1
             }
-
             const handleMouseLeave = (): void => {
-                console.log('Mouse left the canvas')
+                mouseState.x = 0
+                mouseState.y = 0
             }
-
             canvas.addEventListener('mousemove', handleMouseMove)
             canvas.addEventListener('mouseleave', handleMouseLeave)
-            // Cleanup event listeners when the scene is disposed
             _scene.onDisposeObservable.add(() => {
                 canvas.removeEventListener('mousemove', handleMouseMove)
                 canvas.removeEventListener('mouseleave', handleMouseLeave)
             })
         }
+
+        // Accumulate rotation each frame; speed increases with mouse distance from center
+        let currentRotation = rotation
+        const BASE_SPEED = 0.003
+        _scene.onBeforeRenderObservable.add(() => {
+            const dist = Math.sqrt(mouseState.x ** 2 + mouseState.y ** 2)
+            const mouseContrib = Math.min(
+                Math.max(dist * mouse_multiplier, mouse_curve[0]),
+                mouse_curve[1],
+            )
+            currentRotation += BASE_SPEED + mouseContrib
+            const mat = planeMesh.material as ShaderMaterial
+            if (mat) mat.setFloat('uRotation', currentRotation)
+        })
     }
 
     return (
@@ -188,7 +200,7 @@ const SceneGBTScope = ({
                                 offset={_offset}
                                 offset_speed={offset_speed}
                                 rotationScale={rotationScale}
-                                rotation_speed={rotation_speed}
+                                rotation_speed={0}
                                 offsetScale={offsetScale}
                                 opacity={opacity}
                                 image_aspect={image_aspect}

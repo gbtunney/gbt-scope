@@ -1,7 +1,7 @@
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
 import Input from '@mui/material/Input'
-import Slider, { SliderProps } from '@mui/material/Slider'
+import Slider, {type SliderProps } from '@mui/material/Slider'
 import Typography from '@mui/material/Typography'
 import { ReactElement, useState } from 'react'
 import type { Merge } from 'type-fest'

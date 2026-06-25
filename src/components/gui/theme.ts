@@ -1,6 +1,6 @@
-import { createTheme, ThemeOptions } from '@mui/material/styles'
+import { createTheme, type ThemeOptions } from '@mui/material/styles'
 
-export const themeOptions: ThemeOptions = {
+export const themeOptions:  ThemeOptions = {
     palette: {
         background: {
             default: '#1a130a',

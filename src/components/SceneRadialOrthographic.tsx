@@ -5,20 +5,21 @@ import {
     Mesh,
     MeshBuilder,
     Scene,
+    ShaderMaterial,
     Vector3,
 } from '@babylonjs/core'
 import Divider from '@mui/material/Divider'
 import { ThemeProvider } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
 import SceneComponent from 'babylonjs-hook'
-import { CSSProperties, ReactElement, useState } from 'react'
+import { CSSProperties, ReactElement, useEffect, useRef, useState } from 'react'
 import ExpandingPanel from './gui/ExpandingPanel.tsx'
 import InputSlider from './gui/InputSlider.tsx'
 import theme from './gui/theme.js'
 import MaterialRadialSymmetry, {
-    MaterialRadialSymmetryProps,
+  type  MaterialRadialSymmetryProps,
 } from './MaterialRadialSymmetry.tsx'
-import { CameraOrthoConfig, setOrthoCamera } from '../helpers.ts'
+import {type  CameraOrthoConfig, setOrthoCamera } from '../helpers.ts'
 
 type SceneRadialSymmetryProps = {
     aspect_ratio?: number | 'parent'
@@ -55,6 +56,10 @@ const SceneRadialOrthographic = ({
     const [rotationScale, setRotationScale] = useState<number>(0.2)
     const [_offset, setOffset] = useState<[number, number]>([0, 0])
     const [rotationSpeed, setRotationSpeed] = useState<number>(0)
+    const rotationSpeedRef = useRef(rotationSpeed)
+    useEffect(() => {
+        rotationSpeedRef.current = rotationSpeed
+    }, [rotationSpeed])
     const customStyle: CSSProperties = {
         background: 'purple',
         border: '2px solid green',
@@ -96,8 +101,38 @@ const SceneRadialOrthographic = ({
                     setOrthoCamera(_scene, camera, cameraSettings)
                 }
             })
-            canvas.tabIndex = 1 // Ensure the canvas can receive keyboard events
+            canvas.tabIndex = 1
         }
+
+        const mouseState = { x: 0, y: 0 }
+        if (canvas) {
+            const handleMouseMove = (event: MouseEvent): void => {
+                const rect = canvas.getBoundingClientRect()
+                mouseState.x = ((event.clientX - rect.left) / rect.width) * 2 - 1
+                mouseState.y = ((event.clientY - rect.top) / rect.height) * 2 - 1
+            }
+            const handleMouseLeave = (): void => {
+                mouseState.x = 0
+                mouseState.y = 0
+            }
+            canvas.addEventListener('mousemove', handleMouseMove)
+            canvas.addEventListener('mouseleave', handleMouseLeave)
+            _scene.onDisposeObservable.add(() => {
+                canvas.removeEventListener('mousemove', handleMouseMove)
+                canvas.removeEventListener('mouseleave', handleMouseLeave)
+            })
+        }
+
+        let currentRotation = 0
+        const MOUSE_MULTIPLIER = 0.01
+        const MOUSE_MAX = 0.015
+        _scene.onBeforeRenderObservable.add(() => {
+            const dist = Math.sqrt(mouseState.x ** 2 + mouseState.y ** 2)
+            const mouseContrib = Math.min(dist * MOUSE_MULTIPLIER, MOUSE_MAX)
+            currentRotation += rotationSpeedRef.current * 0.003 + mouseContrib
+            const mat = planeMesh.material as ShaderMaterial
+            if (mat) mat.setFloat('uRotation', currentRotation)
+        })
     }
 
     return (
@@ -218,7 +253,7 @@ const SceneRadialOrthographic = ({
                                 scaleFactor={scaleFactor}
                                 offset={_offset}
                                 rotationScale={rotationScale}
-                                rotation_speed={rotationSpeed}
+                                rotation_speed={0}
                                 offsetScale={offsetScale}
                                 opacity={0.8}
                                 image_aspect={aspect}
